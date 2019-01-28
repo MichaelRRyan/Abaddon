@@ -1,3 +1,4 @@
+// @Author Michael Rainsford Ryan
 #pragma once
 
 #include <SFML\Graphics.hpp>

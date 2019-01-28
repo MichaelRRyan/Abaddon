@@ -1,5 +1,5 @@
-// author Peter Lowe
-// don't edit this file
+// @Author Michael Rainsford Ryan
+
 #ifndef MY_VECTOR2
 #define MY_VECTOR2
 

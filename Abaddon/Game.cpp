@@ -7,11 +7,13 @@
 /// @Date 28/01/2019
 /// C00239510
 /// Estimated time: 4h
+/// Session 1: 09:41 - 10:57 - 28/01/2019
+/// Session 2: 12:32 - 
 ///
 
-//////////////////////////////////////////////////////////// 
-// include correct library file for release and debug versions
-//////////////////////////////////////////////////////////// 
+//////////////////////////////////////////////////////////// ////
+// include correct library file for release and debug versions //
+/////////////////////////////////////////////////////////////////
 
 #ifdef _DEBUG 
 #pragma comment(lib,"sfml-graphics-d.lib") 
@@ -32,7 +34,7 @@
 #include "Game.h"
 
 
-
+// Main entry point
 int main()
 {
 	Game game;
@@ -41,6 +43,7 @@ int main()
 	return 0;
 }
 
+// Default constructer
 Game::Game() :
 	m_window{ sf::VideoMode{ static_cast<unsigned>(WINDOW_WIDTH), static_cast<unsigned>(WINDOW_HEIGHT) }, "Abaddon" },
 	m_exitGame{ false }
@@ -48,11 +51,12 @@ Game::Game() :
 	loadContent();
 }
 
-
+// Default destructer
 Game::~Game()
 {
 }
 
+// Sets the framerate and keeps the game running
 void Game::run()
 {
 	sf::Clock clock;
@@ -75,6 +79,7 @@ void Game::run()
 	}
 }
 
+// Process and handle user events
 void Game::processEvents()
 {
 	sf::Event nextEvent;
@@ -88,6 +93,7 @@ void Game::processEvents()
 	}
 }
 
+// Load and setup the game
 void Game::loadContent()
 {
 	m_circle.setPosition(sf::Vector2f{ 400.0f, 300.0f });
@@ -95,6 +101,7 @@ void Game::loadContent()
 	m_circle.setFillColor(sf::Color::Red);
 }
 
+// Updates the game world
 void Game::update(sf::Time t_delta)
 {
 	if (m_exitGame)
@@ -102,19 +109,20 @@ void Game::update(sf::Time t_delta)
 		m_window.close();
 	}
 
-	if (sf::Keyboard::isKeyPressed(sf::Keyboard::Up))
+	// Check and apply movement to the player
+	if (checkMoveInput(NORTH) && !checkMoveInput(SOUTH)) // Check that the up movement is true and down movement is false
 	{
 		player.moveUp();
 	}
-	if (sf::Keyboard::isKeyPressed(sf::Keyboard::Down))
+	if (checkMoveInput(SOUTH) && !checkMoveInput(NORTH)) // Check that the down movement is true and up movement is false
 	{
 		player.moveDown();
 	}
-	if (sf::Keyboard::isKeyPressed(sf::Keyboard::Left))
+	if (checkMoveInput(WEST) && !checkMoveInput(EAST)) // Check that the left movement is true and right movement is false
 	{
 		player.moveLeft();
 	}
-	if (sf::Keyboard::isKeyPressed(sf::Keyboard::Right))
+	if (checkMoveInput(EAST) && !checkMoveInput(WEST)) // Check that the right movement is true and left movement is false
 	{
 		player.moveRight();
 	}
@@ -122,6 +130,7 @@ void Game::update(sf::Time t_delta)
 	player.update();
 }
 
+// Draws the game world and window
 void Game::render()
 {
 	m_window.clear(sf::Color::White);
@@ -130,4 +139,57 @@ void Game::render()
 	m_window.draw(player.getBody());
 
 	m_window.display();
+}
+
+// Checks for movement keys in an inputted direction to allow for multiple movement keys
+bool Game::checkMoveInput(int t_direction)
+{
+	bool inputFound = false;
+
+	if (t_direction == NORTH)
+	{
+		if (sf::Keyboard::isKeyPressed(sf::Keyboard::Up))
+		{
+			inputFound = true;
+		}
+		else if (sf::Keyboard::isKeyPressed(sf::Keyboard::W))
+		{
+			inputFound = true;
+		}
+	}
+	else if (t_direction == SOUTH)
+	{
+		if (sf::Keyboard::isKeyPressed(sf::Keyboard::Down))
+		{
+			inputFound = true;
+		}
+		else if (sf::Keyboard::isKeyPressed(sf::Keyboard::S))
+		{
+			inputFound = true;
+		}
+	}
+	else if (t_direction == WEST)
+	{
+		if (sf::Keyboard::isKeyPressed(sf::Keyboard::Left))
+		{
+			inputFound = true;
+		}
+		else if (sf::Keyboard::isKeyPressed(sf::Keyboard::A))
+		{
+			inputFound = true;
+		}
+	}
+	else if (t_direction == EAST)
+	{
+		if (sf::Keyboard::isKeyPressed(sf::Keyboard::Right))
+		{
+			inputFound = true;
+		}
+		else if (sf::Keyboard::isKeyPressed(sf::Keyboard::D))
+		{
+			inputFound = true;
+		}
+	}
+
+	return inputFound;
 }

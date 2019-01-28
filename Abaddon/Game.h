@@ -1,3 +1,4 @@
+// @Author Michael Rainsford Ryan
 #ifndef GAME
 #define GAME
 
@@ -16,6 +17,7 @@ private:
 	void loadContent();
 	void update(sf::Time t_delta);
 	void render();
+	bool checkMoveInput(int t_direction);
 	
 	sf::RenderWindow m_window;
 	bool m_exitGame;
