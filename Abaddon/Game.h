@@ -5,6 +5,7 @@
 #include <SFML\Graphics.hpp>
 #include "Globals.h"
 #include "Player.h"
+#include "Crow.h"
 
 class Game
 {
@@ -22,8 +23,18 @@ private:
 	sf::RenderWindow m_window;
 	bool m_exitGame;
 
+	// Setup the shapes
 	sf::CircleShape m_circle;
+	sf::RectangleShape m_leftWall;
+	sf::RectangleShape m_rightWall;
+
+	// Setup the game objects
 	Player player;
+	Crow crow;
+
+	// Declare UI components
+	sf::Font m_arialFont;
+	sf::Text m_playerHealthText;
 };
 
 

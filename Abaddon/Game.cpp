@@ -96,9 +96,29 @@ void Game::processEvents()
 // Load and setup the game
 void Game::loadContent()
 {
+	if (!m_arialFont.loadFromFile("ASSETS\\FONT\\arial.ttf"))
+	{
+		// Error loading font file
+	}
+
+	m_playerHealthText.setFont(m_arialFont);
+	m_playerHealthText.setPosition(WALL_WIDTH, 0.0f);
+	m_playerHealthText.setCharacterSize(20u);
+	m_playerHealthText.setFillColor(sf::Color::Black);
+	m_playerHealthText.setString("Health: ");
+
 	m_circle.setPosition(sf::Vector2f{ 400.0f, 300.0f });
 	m_circle.setRadius(30.0f);
 	m_circle.setFillColor(sf::Color::Red);
+
+	m_leftWall.setPosition(0.0f, 0.0f);
+	m_rightWall.setPosition(WINDOW_WIDTH - WALL_WIDTH, 0.0f);
+
+	m_leftWall.setSize({ WALL_WIDTH, WINDOW_HEIGHT });
+	m_rightWall.setSize({ WALL_WIDTH, WINDOW_HEIGHT });
+
+	m_leftWall.setFillColor(sf::Color::Yellow);
+	m_rightWall.setFillColor(sf::Color::Yellow);
 }
 
 // Updates the game world
@@ -128,6 +148,8 @@ void Game::update(sf::Time t_delta)
 	}
 
 	player.update();
+	crow.update(player);
+	m_playerHealthText.setString("Health: " + std::to_string(player.getHealth()));
 }
 
 // Draws the game world and window
@@ -137,6 +159,12 @@ void Game::render()
 
 	m_window.draw(m_circle);
 	m_window.draw(player.getBody());
+	m_window.draw(crow.getBody());
+
+	m_window.draw(m_leftWall);
+	m_window.draw(m_rightWall);
+
+	m_window.draw(m_playerHealthText);
 
 	m_window.display();
 }

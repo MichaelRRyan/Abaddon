@@ -121,12 +121,14 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClInclude Include="Crow.h" />
     <ClInclude Include="Game.h" />
     <ClInclude Include="Globals.h" />
     <ClInclude Include="MyVector2.h" />
     <ClInclude Include="Player.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="Crow.cpp" />
     <ClCompile Include="Game.cpp" />
     <ClCompile Include="MyVector2.cpp" />
     <ClCompile Include="Player.cpp" />

@@ -3,6 +3,7 @@
 
 #include <SFML\Graphics.hpp>
 #include "MyVector2.h"
+#include "Globals.h"
 
 class Player
 {
@@ -14,14 +15,21 @@ class Player
 	int health;
 	float speed;
 	float friction;
+	int movementLockTimer; // The time remaining until the player can move again
+
+	int wallMovementLockTime; // How long the movement will be locked after hitting the wall
+	float wallLaunchSpeed; // How fast you'll be launched away from the wall if you touch it
 
 
 public:
+	// Public function members
 	Player();
 	void setup();
 	void loadFiles();
 
+	sf::Vector2f getPosition();
 	sf::Sprite getBody();
+	int getHealth();
 
 	void moveUp();
 	void moveDown();
@@ -29,5 +37,7 @@ public:
 	void moveRight();
 
 	void update();
+
+	void wallCollisions();
 };
 
