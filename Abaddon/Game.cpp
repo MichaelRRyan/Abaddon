@@ -107,10 +107,6 @@ void Game::loadContent()
 	m_playerHealthText.setFillColor(sf::Color::Black);
 	m_playerHealthText.setString("Health: ");
 
-	m_circle.setPosition(sf::Vector2f{ 400.0f, 300.0f });
-	m_circle.setRadius(30.0f);
-	m_circle.setFillColor(sf::Color::Red);
-
 	m_leftWall.setPosition(0.0f, 0.0f);
 	m_rightWall.setPosition(WINDOW_WIDTH - WALL_WIDTH, 0.0f);
 
@@ -147,7 +143,10 @@ void Game::update(sf::Time t_delta)
 		player.moveRight();
 	}
 
-	player.update();
+	if (player.getActive()) // If the player is alive
+	{
+		player.update();
+	}
 	crow.update(player);
 	m_playerHealthText.setString("Health: " + std::to_string(player.getHealth()));
 }
@@ -157,8 +156,10 @@ void Game::render()
 {
 	m_window.clear(sf::Color::White);
 
-	m_window.draw(m_circle);
-	m_window.draw(player.getBody());
+	if (player.getActive())
+	{
+		m_window.draw(player.getBody());
+	}
 	m_window.draw(crow.getBody());
 
 	m_window.draw(m_leftWall);

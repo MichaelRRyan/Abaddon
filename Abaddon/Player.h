@@ -20,6 +20,8 @@ class Player
 	int wallMovementLockTime; // How long the movement will be locked after hitting the wall
 	float wallLaunchSpeed; // How fast you'll be launched away from the wall if you touch it
 
+	bool active;
+
 
 public:
 	// Public function members
@@ -30,6 +32,8 @@ public:
 	sf::Vector2f getPosition();
 	sf::Sprite getBody();
 	int getHealth();
+	bool getActive();
+
 
 	void moveUp();
 	void moveDown();
@@ -37,7 +41,8 @@ public:
 	void moveRight();
 
 	void update();
-
+	void die();
 	void wallCollisions();
+	void damage(int t_damageValue, int freezeTime);
 };
 

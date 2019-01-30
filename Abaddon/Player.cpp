@@ -52,6 +52,11 @@ int Player::getHealth()
 	return health;
 }
 
+bool Player::getActive()
+{
+	return active;
+}
+
 // Move the player up
 void Player::moveUp()
 {
@@ -110,18 +115,29 @@ void Player::update()
 	moveDir = { 0.0f, 0.0f }; // Reset the move direction for next frame
 
 	wallCollisions();
+
+	if (health <= 0)
+	{
+		die();
+	}
+}
+
+void Player::die()
+{
+	health = 0;
+	active = false;
 }
 
 void Player::wallCollisions()
 {
-	if (body.getPosition().x < WALL_WIDTH)
+	if (body.getPosition().x < WALL_WIDTH) // Check the left wall collisions
 	{
 		body.setPosition(WALL_WIDTH, body.getPosition().y);
 		velocity.x = wallLaunchSpeed;
 		movementLockTimer = wallMovementLockTime;
 		health--;
 	}
-	if (body.getPosition().x + body.getGlobalBounds().width > WINDOW_WIDTH - WALL_WIDTH)
+	if (body.getPosition().x + body.getGlobalBounds().width > WINDOW_WIDTH - WALL_WIDTH) // Check the right wall collisions
 	{
 		body.setPosition(WINDOW_WIDTH - WALL_WIDTH - body.getGlobalBounds().width, body.getPosition().y);
 		velocity.x = -wallLaunchSpeed;

@@ -24,7 +24,6 @@ private:
 	bool m_exitGame;
 
 	// Setup the shapes
-	sf::CircleShape m_circle;
 	sf::RectangleShape m_leftWall;
 	sf::RectangleShape m_rightWall;
 
