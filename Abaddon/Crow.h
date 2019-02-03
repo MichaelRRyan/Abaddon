@@ -17,6 +17,8 @@ class Crow
 	int behaviour; // Controls which behaviour is run
 	float diveRange; // How close the player has to be along the x axis to the crow for it to dive
 	float diveHeight; // How far away the crow has to be along the y axis for the crow to dive
+	bool active;
+	int attackDamage;
 
 public:
 	// Public function members
@@ -24,10 +26,13 @@ public:
 	void setup();
 	void loadFiles();
 
-	sf::Sprite getBody();
+	void changeHealth(int t_changeAmount);
 
-	void update(Player t_player); // Update the crow and pick the behaviour
-	void attack(Player t_player); // The attack behaviour handles the crow attacking the player
+	sf::Sprite getBody();
+	bool getActive();
+
+	void update(Player & t_player, float & t_score); // Update the crow and pick the behaviour
+	void attack(Player & t_player); // The attack behaviour handles the crow attacking the player
 	void patrol(Player t_player); // Handles the patrol behaviour before the crow attacks
 };
 

@@ -1,3 +1,4 @@
+// @Author Michael Rainsford Ryan
 #include "Crow.h"
 
 
@@ -16,7 +17,9 @@ void Crow::setup()
 	health = 3;
 	behaviour = 0;
 	diveRange = 10.0f;
-	diveHeight = 20.0f;
+	diveHeight = 200.0f;
+	attackDamage = 1;
+	active = true;
 }
 
 void Crow::loadFiles()
@@ -29,12 +32,22 @@ void Crow::loadFiles()
 	body.setTexture(spriteSheet);
 }
 
+void Crow::changeHealth(int t_changeAmount)
+{
+	health += t_changeAmount;
+}
+
 sf::Sprite Crow::getBody()
 {
 	return body;
 }
 
-void Crow::update(Player t_player)
+bool Crow::getActive()
+{
+	return active;
+}
+
+void Crow::update(Player & t_player, float & t_score)
 {
 	if (behaviour <= 1) // If the behaviour is in standby or patrol, run patrol
 	{
@@ -46,9 +59,16 @@ void Crow::update(Player t_player)
 	}
 
 	body.move(velocity);
+
+	// Check if still alive
+	if (health <= 0)
+	{
+		active = false;
+		t_score += 10;
+	}
 }
 
-void Crow::attack(Player t_player)
+void Crow::attack(Player & t_player)
 {
 	if (t_player.getActive())
 	{
@@ -58,6 +78,7 @@ void Crow::attack(Player t_player)
 		if (body.getGlobalBounds().intersects(t_player.getBody().getGlobalBounds())) // If the crow collides with the player, go back to patrolling
 		{
 			behaviour = 0; // Set the behaviour to the standby
+			t_player.damage(attackDamage, 15); // Damage the player and stun them for 15 frames
 		}
 	}
 	else
@@ -95,9 +116,9 @@ void Crow::patrol(Player t_player)
 		velocity.x = -velocity.x;
 		body.setPosition(WINDOW_WIDTH - WALL_WIDTH - body.getGlobalBounds().width, body.getPosition().y);
 	}
-	if (body.getPosition().y < 0) // Check for top boundary
+	if (body.getPosition().y < WINDOW_HEIGHT_BEGINNING) // Check for top boundary
 	{
-		body.setPosition(body.getPosition().x, 0.0f);
+		body.setPosition(body.getPosition().x, WINDOW_HEIGHT_BEGINNING);
 		velocity.y = 0.0f;
 	}
 

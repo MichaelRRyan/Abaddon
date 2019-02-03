@@ -43,6 +43,6 @@ public:
 	void update();
 	void die();
 	void wallCollisions();
-	void damage(int t_damageValue, int freezeTime);
+	void damage(int t_damageValue, int t_freezeTime);
 };
 

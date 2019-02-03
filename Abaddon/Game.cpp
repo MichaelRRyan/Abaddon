@@ -8,7 +8,7 @@
 /// C00239510
 /// Estimated time: 4h
 /// Session 1: 09:41 - 10:57 - 28/01/2019
-/// Session 2: 12:32 - 
+/// Session 2: 16:13 - 18:21 - 01/02/2019
 ///
 
 //////////////////////////////////////////////////////////// ////
@@ -60,7 +60,8 @@ Game::~Game()
 void Game::run()
 {
 	sf::Clock clock;
-	sf::Time timePerFrame = sf::seconds(1.0f / 60.0f);
+	const float FPS{ 60.0f };
+	sf::Time timePerFrame = sf::seconds(1.0f / FPS);
 	sf::Time timeSinceLastUpdate = sf::Time::Zero;
 
 	while (m_window.isOpen())
@@ -71,7 +72,7 @@ void Game::run()
 
 		if (timeSinceLastUpdate > timePerFrame)
 		{
-			update(timePerFrame);
+			update(FPS);
 			render();
 
 			timeSinceLastUpdate -= timePerFrame;
@@ -90,22 +91,49 @@ void Game::processEvents()
 		{
 			m_window.close();
 		}
+		if (nextEvent.type == sf::Event::MouseButtonPressed)
+		{
+			if (nextEvent.mouseButton.button == sf::Mouse::Left)
+			{
+				fireBullet(nextEvent);
+			}
+		}
+	}
+}
+
+void Game::fireBullet(sf::Event t_mouseEvent)
+{
+	sf::Vector2i mousePosition = { t_mouseEvent.mouseButton.x, t_mouseEvent.mouseButton.y };
+	sf::Vector2f distanceVector = static_cast<sf::Vector2f>(mousePosition) - player.getPosition();
+	float distanceMagnitude = sqrt(distanceVector.x * distanceVector.x + distanceVector.y * distanceVector.y);
+	sf::Vector2f bulletDirection = distanceVector / distanceMagnitude;
+
+	// Loop to find a non active bullet to fire
+	for (int i = 0; i < MAX_BULLETS; i++)
+	{
+		if (!bullets[i].getActive())
+		{
+			bullets[i].intialise(player.getPosition(), bulletDirection, 5.0f, 1);
+			break;
+		}
 	}
 }
 
 // Load and setup the game
 void Game::loadContent()
 {
-	if (!m_arialFont.loadFromFile("ASSETS\\FONT\\arial.ttf"))
+	if (!m_impactFont.loadFromFile("ASSETS\\FONT\\impact.ttf"))
 	{
 		// Error loading font file
 	}
 
-	m_playerHealthText.setFont(m_arialFont);
-	m_playerHealthText.setPosition(WALL_WIDTH, 0.0f);
-	m_playerHealthText.setCharacterSize(20u);
-	m_playerHealthText.setFillColor(sf::Color::Black);
-	m_playerHealthText.setString("Health: ");
+	m_scoreText.setFont(m_impactFont);
+	m_scoreText.setPosition(WINDOW_WIDTH / 2 - 70.0f, 50.0f);
+	m_scoreText.setCharacterSize(30u);
+	m_scoreText.setFillColor(sf::Color::White);
+	m_scoreText.setOutlineColor(sf::Color::Black);
+	m_scoreText.setOutlineThickness(1.0f);
+	m_scoreText.setString("SCORE: ");
 
 	m_leftWall.setPosition(0.0f, 0.0f);
 	m_rightWall.setPosition(WINDOW_WIDTH - WALL_WIDTH, 0.0f);
@@ -113,12 +141,25 @@ void Game::loadContent()
 	m_leftWall.setSize({ WALL_WIDTH, WINDOW_HEIGHT });
 	m_rightWall.setSize({ WALL_WIDTH, WINDOW_HEIGHT });
 
-	m_leftWall.setFillColor(sf::Color::Yellow);
-	m_rightWall.setFillColor(sf::Color::Yellow);
+	m_leftWall.setFillColor(sf::Color{ 60, 40, 20 });
+	m_rightWall.setFillColor(sf::Color{ 60, 40, 20 });
+
+	m_healthBar.setSize(sf::Vector2f{ 300.0f, 20.0f });
+	m_healthBar.setOutlineColor(sf::Color::Black);
+	m_healthBar.setOutlineThickness(2.0f);
+	m_healthBar.setOrigin(150.0f, 10.0f);
+	m_healthBar.setPosition(WINDOW_WIDTH / 2.0f, 30.0f);
+	m_healthBar.setFillColor(sf::Color::Red);
+
+	m_statusBar.setSize(sf::Vector2f{ WINDOW_WIDTH, WINDOW_HEIGHT_BEGINNING });
+	m_statusBar.setPosition(0.0f, 0.0f);
+	m_statusBar.setFillColor(sf::Color{ 50, 160, 85 });
+	m_statusBar.setOutlineColor(sf::Color::Black);
+	m_statusBar.setOutlineThickness(2.0f);
 }
 
 // Updates the game world
-void Game::update(sf::Time t_delta)
+void Game::update(float t_delta)
 {
 	if (m_exitGame)
 	{
@@ -147,25 +188,69 @@ void Game::update(sf::Time t_delta)
 	{
 		player.update();
 	}
-	crow.update(player);
-	m_playerHealthText.setString("Health: " + std::to_string(player.getHealth()));
+	if (crow.getActive()) // update the crow if active
+	{
+		crow.update(player, m_score);
+	}
+
+	// Update all active bullets
+	for (int i = 0; i < MAX_BULLETS; i++)
+	{
+		if (bullets[i].getActive())
+		{
+			bullets[i].update();
+			if (bullets[i].isColliding(crow.getBody()) && crow.getActive())
+			{
+				crow.changeHealth(-bullets[i].getDamage());
+				bullets[i].setActive(false);
+			}
+		}
+	}
+
+	// Update the score and text
+	if (m_gameActive)
+	{
+		m_score += 5 / t_delta;
+		m_scoreText.setString("SCORE: " + std::to_string(static_cast<int>(m_score)));
+	}
+
+	m_healthBar.setScale(static_cast<float>(1.0f * player.getHealth() / MAX_HEALTH), 1.0f);
+
+	if (!player.getActive())
+	{
+		m_gameActive = false;
+	}
 }
 
 // Draws the game world and window
 void Game::render()
 {
-	m_window.clear(sf::Color::White);
+	m_window.clear(sf::Color{ 90, 60, 30 }); // Clear the screen to a brown/cave colour
 
 	if (player.getActive())
 	{
 		m_window.draw(player.getBody());
 	}
-	m_window.draw(crow.getBody());
+	if (crow.getActive())
+	{
+		m_window.draw(crow.getBody());
+	}
 
 	m_window.draw(m_leftWall);
 	m_window.draw(m_rightWall);
 
-	m_window.draw(m_playerHealthText);
+	// Draw all active bullets
+	for (int i = 0; i < MAX_BULLETS; i++)
+	{
+		if (bullets[i].getActive())
+		{
+			m_window.draw(bullets[i].getBody());
+		}
+	}
+
+	m_window.draw(m_statusBar);
+	m_window.draw(m_scoreText);
+	m_window.draw(m_healthBar);
 
 	m_window.display();
 }

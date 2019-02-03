@@ -18,7 +18,7 @@ void Player::setup()
 	body.setPosition(300.0f, 400.0f);
 
 	speed = 5.0f;
-	health = 5;
+	health = MAX_HEALTH;
 	velocity = { 0.0f,0.0f };
 	friction = 0.96f;
 	movementLockTimer = 0;
@@ -33,6 +33,7 @@ void Player::loadFiles()
 	}
 
 	body.setTexture(spriteSheet);
+	body.setOrigin(body.getGlobalBounds().width / 2, body.getGlobalBounds().height / 2);
 }
 
 // Return the position of the object
@@ -128,21 +129,38 @@ void Player::die()
 	active = false;
 }
 
+// Handle collisions between the player and the wall
 void Player::wallCollisions()
 {
-	if (body.getPosition().x < WALL_WIDTH) // Check the left wall collisions
+	// Check horisontal collisions
+	if (body.getPosition().x < WALL_WIDTH + body.getGlobalBounds().width / 2) // Check the left wall collisions
 	{
-		body.setPosition(WALL_WIDTH, body.getPosition().y);
-		velocity.x = wallLaunchSpeed;
-		movementLockTimer = wallMovementLockTime;
-		health--;
+		body.setPosition(WALL_WIDTH + body.getGlobalBounds().width / 2, body.getPosition().y); // Set the position to the wall position in case of overlap
+		velocity.x = wallLaunchSpeed; // Launch the player off the wall
+		damage(1, wallMovementLockTime); // Damage and freeze the player
 	}
-	if (body.getPosition().x + body.getGlobalBounds().width > WINDOW_WIDTH - WALL_WIDTH) // Check the right wall collisions
+	else if (body.getPosition().x > WINDOW_WIDTH - WALL_WIDTH - body.getGlobalBounds().width / 2) // Check the right wall collisions
 	{
-		body.setPosition(WINDOW_WIDTH - WALL_WIDTH - body.getGlobalBounds().width, body.getPosition().y);
-		velocity.x = -wallLaunchSpeed;
-		movementLockTimer = wallMovementLockTime;
-		health--;
+		body.setPosition(WINDOW_WIDTH - WALL_WIDTH - body.getGlobalBounds().width / 2, body.getPosition().y); // Set the position to the wall position in case of overlap
+		velocity.x = -wallLaunchSpeed; // Launch the player off the wall
+		damage(1, wallMovementLockTime); // Damage and freeze the player
 	}
+
+	// Check vertical collsions
+	if (body.getPosition().y > WINDOW_HEIGHT - body.getGlobalBounds().height / 2) // Check the right wall collisions
+	{
+		body.setPosition(body.getPosition().x, WINDOW_HEIGHT - body.getGlobalBounds().height / 2);
+	}
+	else if (body.getPosition().y < WINDOW_HEIGHT_BEGINNING + body.getGlobalBounds().height / 2)
+	{
+		body.setPosition(body.getPosition().x, WINDOW_HEIGHT_BEGINNING + body.getGlobalBounds().height / 2);
+	}
+}
+
+// Deal damage to the player and freeze movement for an amount of time
+void Player::damage(int t_damageValue, int t_freezeTime)
+{
+	movementLockTimer = t_freezeTime;
+	health -= t_damageValue;
 }
 
