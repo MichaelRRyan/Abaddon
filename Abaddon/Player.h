@@ -34,7 +34,6 @@ public:
 	int getHealth();
 	bool getActive();
 
-
 	void moveUp();
 	void moveDown();
 	void moveLeft();
@@ -44,5 +43,7 @@ public:
 	void die();
 	void wallCollisions();
 	void damage(int t_damageValue, int t_freezeTime);
+
+	void draw(sf::RenderWindow & t_window);
 };
 

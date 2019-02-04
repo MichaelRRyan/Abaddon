@@ -25,5 +25,7 @@ public:
 	void intialise(sf::Vector2f t_position, sf::Vector2f t_direction, float t_speed, int t_damage);
 	bool isColliding(sf::Sprite t_collider);
 	void update();
+
+	void draw(sf::RenderWindow & t_window);
 };
 

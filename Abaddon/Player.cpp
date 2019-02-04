@@ -164,3 +164,13 @@ void Player::damage(int t_damageValue, int t_freezeTime)
 	health -= t_damageValue;
 }
 
+void Player::draw(sf::RenderWindow & t_window)
+{
+	{
+		if (active)
+		{
+			t_window.draw(body);
+		}
+	}
+}
+

@@ -9,6 +9,7 @@
 /// Estimated time: 4h
 /// Session 1: 09:41 - 10:57 - 28/01/2019
 /// Session 2: 16:13 - 18:21 - 01/02/2019
+/// Session 3: 09:04 - 10:56 - 04/02/2019 // Added earthworm and cleaned code
 ///
 
 //////////////////////////////////////////////////////////// ////
@@ -166,6 +167,141 @@ void Game::update(float t_delta)
 		m_window.close();
 	}
 
+
+	// Respawn the crow if not already active
+	if (rand() % 120 == 0 && !crow.getActive())
+	{
+		float randomX = rand() / float(RAND_MAX) * (WINDOW_HEIGHT - WALL_WIDTH * 2) - WALL_WIDTH; // Get a random float value with the range of the active screen width
+		crow.setPosition(randomX, WINDOW_HEIGHT_BEGINNING); // Set the position of the crow
+		crow.setup(); // Setup the crow again (respawn it)
+	}
+
+	manageMovement(); // Manage the input and move the player accordingly
+
+	if (player.getActive()) // If the player is alive
+	{
+		player.update();
+	}
+	if (crow.getActive()) // update the crow if active
+	{
+		crow.update(player, m_score);
+	}
+
+	// Update all active bullets
+	for (int i = 0; i < MAX_BULLETS; i++)
+	{
+		if (bullets[i].getActive()) // If the current bullet is active
+		{
+			bullets[i].update(); // Update the bullet
+
+			if (bullets[i].isColliding(crow.getBody()) && crow.getActive()) // If the crow is active and the colliding with a bullet
+			{
+				crow.changeHealth(-bullets[i].getDamage()); // Damage the crow
+				bullets[i].setActive(false); // Deactivate the colliding bullet
+			}
+		}
+	}
+
+	earthworm.update(m_window);
+
+	// Update the score and text
+	if (m_gameActive)
+	{
+		m_score += 5 / t_delta;
+		m_scoreText.setString("SCORE: " + std::to_string(static_cast<int>(m_score)));
+	}
+
+	m_healthBar.setScale(static_cast<float>(1.0f * player.getHealth() / MAX_HEALTH), 1.0f); // Update the healthbar GUI
+
+	if (!player.getActive())
+	{
+		m_gameActive = false;
+	}
+}
+
+// Draws the game world and window
+void Game::render()
+{
+	m_window.clear(sf::Color{ 90, 60, 30 }); // Clear the screen to a brown/cave colour
+
+	// Draw the game characters
+	player.draw(m_window);
+	crow.draw(m_window);
+	earthworm.draw(m_window);
+
+	// Draw the bullets
+	for (int i = 0; i < MAX_BULLETS; i++)
+	{
+		bullets[i].draw(m_window);
+	}
+
+	// Draw the game world
+	m_window.draw(m_leftWall);
+	m_window.draw(m_rightWall);
+
+	// Draw the GUI
+	m_window.draw(m_statusBar);
+	m_window.draw(m_scoreText);
+	m_window.draw(m_healthBar);
+
+	m_window.display();
+}
+
+// Checks for movement keys in an inputted direction to allow for multiple movement keys
+bool Game::checkMoveInput(int t_direction)
+{
+	bool inputFound = false;
+
+	if (t_direction == NORTH) // Check directions for north
+	{
+		if (sf::Keyboard::isKeyPressed(sf::Keyboard::Up))
+		{
+			inputFound = true;
+		}
+		else if (sf::Keyboard::isKeyPressed(sf::Keyboard::W))
+		{
+			inputFound = true;
+		}
+	}
+	else if (t_direction == SOUTH) // Check directions for south
+	{
+		if (sf::Keyboard::isKeyPressed(sf::Keyboard::Down))
+		{
+			inputFound = true;
+		}
+		else if (sf::Keyboard::isKeyPressed(sf::Keyboard::S))
+		{
+			inputFound = true;
+		}
+	}
+	else if (t_direction == WEST) // Check directions for west
+	{
+		if (sf::Keyboard::isKeyPressed(sf::Keyboard::Left))
+		{
+			inputFound = true;
+		}
+		else if (sf::Keyboard::isKeyPressed(sf::Keyboard::A))
+		{
+			inputFound = true;
+		}
+	}
+	else if (t_direction == EAST) // Check directions for east
+	{
+		if (sf::Keyboard::isKeyPressed(sf::Keyboard::Right))
+		{
+			inputFound = true;
+		}
+		else if (sf::Keyboard::isKeyPressed(sf::Keyboard::D))
+		{
+			inputFound = true;
+		}
+	}
+
+	return inputFound;
+}
+
+void Game::manageMovement()
+{
 	// Check and apply movement to the player
 	if (checkMoveInput(NORTH) && !checkMoveInput(SOUTH)) // Check that the up movement is true and down movement is false
 	{
@@ -183,127 +319,4 @@ void Game::update(float t_delta)
 	{
 		player.moveRight();
 	}
-
-	if (player.getActive()) // If the player is alive
-	{
-		player.update();
-	}
-	if (crow.getActive()) // update the crow if active
-	{
-		crow.update(player, m_score);
-	}
-
-	// Update all active bullets
-	for (int i = 0; i < MAX_BULLETS; i++)
-	{
-		if (bullets[i].getActive())
-		{
-			bullets[i].update();
-			if (bullets[i].isColliding(crow.getBody()) && crow.getActive())
-			{
-				crow.changeHealth(-bullets[i].getDamage());
-				bullets[i].setActive(false);
-			}
-		}
-	}
-
-	// Update the score and text
-	if (m_gameActive)
-	{
-		m_score += 5 / t_delta;
-		m_scoreText.setString("SCORE: " + std::to_string(static_cast<int>(m_score)));
-	}
-
-	m_healthBar.setScale(static_cast<float>(1.0f * player.getHealth() / MAX_HEALTH), 1.0f);
-
-	if (!player.getActive())
-	{
-		m_gameActive = false;
-	}
-}
-
-// Draws the game world and window
-void Game::render()
-{
-	m_window.clear(sf::Color{ 90, 60, 30 }); // Clear the screen to a brown/cave colour
-
-	if (player.getActive())
-	{
-		m_window.draw(player.getBody());
-	}
-	if (crow.getActive())
-	{
-		m_window.draw(crow.getBody());
-	}
-
-	m_window.draw(m_leftWall);
-	m_window.draw(m_rightWall);
-
-	// Draw all active bullets
-	for (int i = 0; i < MAX_BULLETS; i++)
-	{
-		if (bullets[i].getActive())
-		{
-			m_window.draw(bullets[i].getBody());
-		}
-	}
-
-	m_window.draw(m_statusBar);
-	m_window.draw(m_scoreText);
-	m_window.draw(m_healthBar);
-
-	m_window.display();
-}
-
-// Checks for movement keys in an inputted direction to allow for multiple movement keys
-bool Game::checkMoveInput(int t_direction)
-{
-	bool inputFound = false;
-
-	if (t_direction == NORTH)
-	{
-		if (sf::Keyboard::isKeyPressed(sf::Keyboard::Up))
-		{
-			inputFound = true;
-		}
-		else if (sf::Keyboard::isKeyPressed(sf::Keyboard::W))
-		{
-			inputFound = true;
-		}
-	}
-	else if (t_direction == SOUTH)
-	{
-		if (sf::Keyboard::isKeyPressed(sf::Keyboard::Down))
-		{
-			inputFound = true;
-		}
-		else if (sf::Keyboard::isKeyPressed(sf::Keyboard::S))
-		{
-			inputFound = true;
-		}
-	}
-	else if (t_direction == WEST)
-	{
-		if (sf::Keyboard::isKeyPressed(sf::Keyboard::Left))
-		{
-			inputFound = true;
-		}
-		else if (sf::Keyboard::isKeyPressed(sf::Keyboard::A))
-		{
-			inputFound = true;
-		}
-	}
-	else if (t_direction == EAST)
-	{
-		if (sf::Keyboard::isKeyPressed(sf::Keyboard::Right))
-		{
-			inputFound = true;
-		}
-		else if (sf::Keyboard::isKeyPressed(sf::Keyboard::D))
-		{
-			inputFound = true;
-		}
-	}
-
-	return inputFound;
 }

@@ -31,8 +31,13 @@ public:
 	sf::Sprite getBody();
 	bool getActive();
 
+	void setPosition(float t_xPos, float t_yPos);
+	void setPosition(sf::Vector2f t_position);
+
 	void update(Player & t_player, float & t_score); // Update the crow and pick the behaviour
 	void attack(Player & t_player); // The attack behaviour handles the crow attacking the player
 	void patrol(Player t_player); // Handles the patrol behaviour before the crow attacks
+
+	void draw(sf::RenderWindow & t_window);
 };
 

@@ -7,6 +7,7 @@
 #include "Player.h"
 #include "Crow.h"
 #include "Bullet.h"
+#include "Earthworm.h"
 
 const int MAX_BULLETS{ 10 };
 
@@ -22,7 +23,8 @@ private:
 	void loadContent();
 	void update(float t_delta);
 	void render();
-	bool checkMoveInput(int t_direction);
+	bool checkMoveInput(int t_direction); // Checks for input and returns the correct direction to allow for multiple movement keys
+	void manageMovement(); // Send the input to the player object
 	
 	sf::RenderWindow m_window;
 	bool m_exitGame;
@@ -41,6 +43,7 @@ private:
 	// Setup the game objects
 	Player player;
 	Crow crow;
+	Earthworm earthworm;
 	Bullet bullets[MAX_BULLETS];
 
 	// Declare UI components

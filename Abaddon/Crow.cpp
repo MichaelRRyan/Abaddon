@@ -2,13 +2,14 @@
 #include "Crow.h"
 
 
-
+// Initialise the crow and values only set once
 Crow::Crow()
 {
 	loadFiles();
 	setup();
 }
 
+// Setup the changing values of the crow
 void Crow::setup()
 {
 	velocity = { 0.0f, 0.0f };
@@ -22,6 +23,7 @@ void Crow::setup()
 	active = true;
 }
 
+// Load the files and setup the sprite
 void Crow::loadFiles()
 {
 	if (!spriteSheet.loadFromFile("ASSETS\\IMAGES\\enemy1_down.png"))
@@ -30,23 +32,40 @@ void Crow::loadFiles()
 	}
 
 	body.setTexture(spriteSheet);
+	body.setOrigin(body.getGlobalBounds().width / 2, body.getGlobalBounds().height / 2);
 }
 
+// Change the health of the crow by the inputted value
 void Crow::changeHealth(int t_changeAmount)
 {
 	health += t_changeAmount;
 }
 
+// Get the bodt component of the crow
 sf::Sprite Crow::getBody()
 {
 	return body;
 }
 
+// Get the active state of the crow
 bool Crow::getActive()
 {
 	return active;
 }
 
+// Set the position of the crow using two floats
+void Crow::setPosition(float t_xPos, float t_yPos)
+{
+	body.setPosition(t_xPos, t_yPos);
+}
+
+// Set the position of the crow using a vector
+void Crow::setPosition(sf::Vector2f t_position)
+{
+	body.setPosition(t_position);
+}
+
+// Update the crow and manage the behaviour
 void Crow::update(Player & t_player, float & t_score)
 {
 	if (behaviour <= 1) // If the behaviour is in standby or patrol, run patrol
@@ -58,6 +77,9 @@ void Crow::update(Player & t_player, float & t_score)
 		attack(t_player);
 	}
 
+	float angle = atan2f(velocity.y, velocity.x) * 180 / 3.14f;
+	body.setRotation(angle);
+
 	body.move(velocity);
 
 	// Check if still alive
@@ -68,6 +90,7 @@ void Crow::update(Player & t_player, float & t_score)
 	}
 }
 
+// Dive and attack the player, exit the state once the player is hit
 void Crow::attack(Player & t_player)
 {
 	if (t_player.getActive())
@@ -132,5 +155,13 @@ void Crow::patrol(Player t_player)
 				behaviour = 2;
 			}
 		}
+	}
+}
+
+void Crow::draw(sf::RenderWindow & t_window)
+{
+	if (active)
+	{
+		t_window.draw(body);
 	}
 }

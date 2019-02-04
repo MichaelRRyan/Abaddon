@@ -74,3 +74,11 @@ void Bullet::update()
 		active = false;
 	}
 }
+
+void Bullet::draw(sf::RenderWindow & t_window)
+{
+	if (active)
+	{
+		t_window.draw(body);
+	}
+}

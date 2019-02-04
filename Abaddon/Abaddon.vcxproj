@@ -123,6 +123,7 @@
   <ItemGroup>
     <ClInclude Include="Bullet.h" />
     <ClInclude Include="Crow.h" />
+    <ClInclude Include="Earthworm.h" />
     <ClInclude Include="Game.h" />
     <ClInclude Include="Globals.h" />
     <ClInclude Include="MyVector2.h" />
@@ -131,6 +132,7 @@
   <ItemGroup>
     <ClCompile Include="Bullet.cpp" />
     <ClCompile Include="Crow.cpp" />
+    <ClCompile Include="Earthworm.cpp" />
     <ClCompile Include="Game.cpp" />
     <ClCompile Include="MyVector2.cpp" />
     <ClCompile Include="Player.cpp" />
