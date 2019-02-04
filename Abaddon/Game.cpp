@@ -10,6 +10,7 @@
 /// Session 1: 09:41 - 10:57 - 28/01/2019
 /// Session 2: 16:13 - 18:21 - 01/02/2019
 /// Session 3: 09:04 - 10:56 - 04/02/2019 // Added earthworm and cleaned code
+/// Session 4: 20:14 - 21:00 - 04/02/2019 // Added spawn functionality to the earthworm and cleaned up code
 ///
 
 //////////////////////////////////////////////////////////// ////
@@ -38,6 +39,7 @@
 // Main entry point
 int main()
 {
+	srand(static_cast<unsigned>(time(nullptr)));
 	Game game;
 	game.run();
 
@@ -157,6 +159,8 @@ void Game::loadContent()
 	m_statusBar.setFillColor(sf::Color{ 50, 160, 85 });
 	m_statusBar.setOutlineColor(sf::Color::Black);
 	m_statusBar.setOutlineThickness(2.0f);
+
+	earthworm.spawn();
 }
 
 // Updates the game world
@@ -169,11 +173,16 @@ void Game::update(float t_delta)
 
 
 	// Respawn the crow if not already active
-	if (rand() % 120 == 0 && !crow.getActive())
+	if (!crow.getActive() && rand() % 120 == 0)
 	{
 		float randomX = rand() / float(RAND_MAX) * (WINDOW_HEIGHT - WALL_WIDTH * 2) - WALL_WIDTH; // Get a random float value with the range of the active screen width
 		crow.setPosition(randomX, WINDOW_HEIGHT_BEGINNING); // Set the position of the crow
 		crow.setup(); // Setup the crow again (respawn it)
+	}
+
+	if (!earthworm.getActive() /*&& rand() % 420*/)
+	{
+		earthworm.spawn();
 	}
 
 	manageMovement(); // Manage the input and move the player accordingly
@@ -202,7 +211,7 @@ void Game::update(float t_delta)
 		}
 	}
 
-	earthworm.update(m_window);
+	earthworm.update();
 
 	// Update the score and text
 	if (m_gameActive)

@@ -2,6 +2,7 @@
 #pragma once
 
 #include <SFML\Graphics.hpp>
+#include "Globals.h"
 
 class Earthworm
 {
@@ -14,15 +15,19 @@ class Earthworm
 	float tailRadius; // The radius of the tail
 	float headRadius; // The radius of the head
 	float tailDistanceModifier; // The distance removed from the radius to find the distance between tail segments
+	bool active;
+	float gravityModifier;
 
 public:
 	Earthworm();
-	void setup();
 	void setupShapes();
+	void spawn();
 
-	void update(sf::RenderWindow & t_window);
+	void update();
 	void moveTail();
-
+	void checkGameBounds();
 	void draw(sf::RenderWindow & t_window);
+
+	inline bool getActive() { return active; }
 };
 

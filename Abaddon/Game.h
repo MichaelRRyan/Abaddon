@@ -3,6 +3,8 @@
 #define GAME
 
 #include <SFML\Graphics.hpp>
+#include <ctime>
+#include <cstdlib>
 #include "Globals.h"
 #include "Player.h"
 #include "Crow.h"
