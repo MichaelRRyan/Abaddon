@@ -13,11 +13,11 @@ Crow::Crow()
 void Crow::setup()
 {
 	velocity = { 0.0f, 0.0f };
-	speed = 5.0f;
+	speed = 2.5f;
 	diveSpeed = 8.0f;
 	health = 3;
-	behaviour = 0;
-	diveRange = 10.0f;
+	behaviour = Standby;
+	diveRange = 80.0f;
 	diveHeight = 200.0f;
 	attackDamage = 1;
 	active = true;
@@ -35,47 +35,19 @@ void Crow::loadFiles()
 	body.setOrigin(body.getGlobalBounds().width / 2, body.getGlobalBounds().height / 2);
 }
 
-// Change the health of the crow by the inputted value
-void Crow::changeHealth(int t_changeAmount)
-{
-	health += t_changeAmount;
-}
-
-// Get the bodt component of the crow
-sf::Sprite Crow::getBody()
-{
-	return body;
-}
-
-// Get the active state of the crow
-bool Crow::getActive()
-{
-	return active;
-}
-
-// Set the position of the crow using two floats
-void Crow::setPosition(float t_xPos, float t_yPos)
-{
-	body.setPosition(t_xPos, t_yPos);
-}
-
-// Set the position of the crow using a vector
-void Crow::setPosition(sf::Vector2f t_position)
-{
-	body.setPosition(t_position);
-}
-
 // Update the crow and manage the behaviour
 void Crow::update(Player & t_player, float & t_score)
 {
-	if (behaviour <= 1) // If the behaviour is in standby or patrol, run patrol
+	if (behaviour == Standby || behaviour == Patrol) // If the behaviour is in standby or patrol, run patrol
 	{
 		patrol(t_player);
 	}
 	else
 	{
-		attack(t_player);
+		dive(t_player);
 	}
+
+	wallCollisions();
 
 	float angle = atan2f(velocity.y, velocity.x) * 180 / 3.14f;
 	body.setRotation(angle);
@@ -90,71 +62,89 @@ void Crow::update(Player & t_player, float & t_score)
 	}
 }
 
-// Dive and attack the player, exit the state once the player is hit
-void Crow::attack(Player & t_player)
-{
-	if (t_player.getActive())
-	{
-		sf::Vector2f distanceToPlayer = t_player.getPosition() - body.getPosition();
-		velocity = vectorUnitVector(distanceToPlayer) * diveSpeed;
-
-		if (body.getGlobalBounds().intersects(t_player.getBody().getGlobalBounds())) // If the crow collides with the player, go back to patrolling
-		{
-			behaviour = 0; // Set the behaviour to the standby
-			t_player.damage(attackDamage, 15); // Damage the player and stun them for 15 frames
-		}
-	}
-	else
-	{
-		behaviour = 0; // Set the behaviour to the standby
-	}
-}
-
 // Patrol from one side of the screen to the other
 void Crow::patrol(Player t_player)
 {
 	// PATROL SETUP
-	if (behaviour == 0) // If in standby, set the starting velocity
+	if (behaviour == Standby) // If in standby, set the starting velocity
 	{
 		if (body.getPosition().x > WINDOW_WIDTH / 2) // Check which side of the screen the crow is on
 		{
-			velocity = { speed / 2.0f, -speed / 2.0f }; // Move to right and up if that wall is closer
+			velocity = { speed, -speed / 2.0f }; // Move to right and up if that wall is closer
 		}
 		else
 		{
-			velocity = { -speed / 2.0f, -speed / 2.0f }; // Move to the left and up if that wall is closer
+			velocity = { -speed, -speed / 2.0f }; // Move to the left and up if that wall is closer
 		}
 
-		behaviour = 1;
-	}
-
-	// WALL COLLISIONS
-	if (body.getPosition().x < WALL_WIDTH) // Look out for left wall
-	{
-		velocity.x = -velocity.x;
-		body.setPosition(WALL_WIDTH, body.getPosition().y);
-	}
-	else if (body.getPosition().x > WINDOW_WIDTH - WALL_WIDTH - body.getGlobalBounds().width) // Look out for right wall
-	{
-		velocity.x = -velocity.x;
-		body.setPosition(WINDOW_WIDTH - WALL_WIDTH - body.getGlobalBounds().width, body.getPosition().y);
-	}
-	if (body.getPosition().y < WINDOW_HEIGHT_BEGINNING) // Check for top boundary
-	{
-		body.setPosition(body.getPosition().x, WINDOW_HEIGHT_BEGINNING);
-		velocity.y = 0.0f;
+		behaviour = Patrol;
 	}
 
 	// DIVE FOR THE PLAYER
 	if (t_player.getActive())
 	{
-		if (body.getPosition().y < t_player.getPosition().y - diveHeight) // If the crow is above the player check if it's within dive range
+		if (body.getPosition().y < t_player.getPosition().y - diveHeight || // If the crow is above the player check if it's within dive range
+			(body.getPosition().y < t_player.getPosition().y && t_player.getPosition().y < WINDOW_HEIGHT_BEGINNING + diveHeight)) // Or if the crow is above the player and the player is near the top of the screen
 		{
 			if (body.getPosition().x > t_player.getPosition().x - diveRange && body.getPosition().x < t_player.getPosition().x + diveRange) // Check that the player is within the dive range
 			{
-				behaviour = 2;
+				behaviour = PrepareToDive;
 			}
 		}
+	}
+}
+
+// Dive and attack the player, exit the state once the player is hit
+void Crow::dive(Player & t_player)
+{
+	if (t_player.getActive())
+	{
+		if (behaviour == PrepareToDive) // If the crow is preparing to dive set target to player
+		{
+			sf::Vector2f distanceToPlayer = t_player.getPosition() - body.getPosition();
+			velocity = vectorUnitVector(distanceToPlayer) * diveSpeed;
+			behaviour = Dive;
+		}
+		else // If the crow is diving check for player collisions
+		{
+			if (body.getGlobalBounds().intersects(t_player.getBody().getGlobalBounds())) // If the crow collides with the player, go back to patrolling
+			{
+				behaviour = Standby; // Set the behaviour to the standby
+				t_player.damage(attackDamage, 15); // Damage the player and stun them for 15 frames
+			}
+			if (body.getPosition().y > t_player.getPosition().y + diveHeight) // If the crow dives past the player go back to standby
+			{
+				behaviour = Standby; // Set the behaviour to the standby
+			}
+			if (body.getPosition().y > WINDOW_HEIGHT - body.getGlobalBounds().height / 2) // If the player dives out of the screen go to standby
+			{
+				behaviour = Standby; // Set the behaviour to the standby
+			}
+		}
+	}
+	else
+	{
+		behaviour = Standby; // Set the behaviour to the standby
+	}
+}
+
+void Crow::wallCollisions()
+{
+	// WALL COLLISIONS
+	if (body.getPosition().x < WALL_WIDTH + body.getGlobalBounds().width / 2) // Look out for left wall
+	{
+		velocity.x = -velocity.x;
+		body.setPosition(WALL_WIDTH + body.getGlobalBounds().width / 2, body.getPosition().y);
+	}
+	else if (body.getPosition().x > WINDOW_WIDTH - WALL_WIDTH - body.getGlobalBounds().width / 2) // Look out for right wall
+	{
+		velocity.x = -velocity.x;
+		body.setPosition(WINDOW_WIDTH - WALL_WIDTH - body.getGlobalBounds().width / 2, body.getPosition().y);
+	}
+	if (body.getPosition().y < WINDOW_HEIGHT_BEGINNING + body.getGlobalBounds().height / 2) // Check for top boundary
+	{
+		body.setPosition(body.getPosition().x, WINDOW_HEIGHT_BEGINNING + body.getGlobalBounds().height / 2);
+		velocity.y = 0.0f;
 	}
 }
 

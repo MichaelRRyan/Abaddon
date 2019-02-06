@@ -13,6 +13,8 @@ Earthworm::Earthworm()
 	velocity = { 0.0f, 0.0f };
 	speed = 8.0f;
 	gravityModifier = 0.1f;
+	health = 5;
+	inWall = true;
 
 
 	setupShapes();
@@ -60,6 +62,7 @@ void Earthworm::spawn()
 		velocity.x = -speed;
 	}
 	
+	// Set the position of the head and tail segments
 	head.setPosition(xPos, yPos);
 	for (int i = 0; i < TAIL_LENGTH; i++)
 	{
@@ -70,21 +73,68 @@ void Earthworm::spawn()
 
 	health = 5;
 	active = true;
+	inWall = false;
+}
+
+// Jump out to attack the player
+void Earthworm::jumpAttack()
+{
+	float yPos = rand() / float(RAND_MAX) * (WINDOW_HEIGHT - WINDOW_HEIGHT_BEGINNING) + WINDOW_HEIGHT_BEGINNING; // Pick a random Y position within the play area
+	float xPos;
+
+	if (head.getPosition().x < WINDOW_WIDTH / 2) // jump out of the screen on the side the worm is at
+	{
+		xPos = WALL_WIDTH;
+		velocity.x = speed;
+	}
+	else
+	{
+		xPos = WINDOW_WIDTH - WALL_WIDTH;
+		velocity.x = -speed;
+	}
+
+	// Set the start position of the head and tail segments
+	head.setPosition(xPos, yPos);
+	for (int i = 0; i < TAIL_LENGTH; i++)
+	{
+		tail[i].setPosition(xPos, yPos);
+	}
+
+	velocity.y = -4.0f; // Jump height
+
+	//health = 5;
+	inWall = false;
 }
 
 // Update the worm and move it
-void Earthworm::update()
+void Earthworm::update(Player & t_player)
 {
 	if (active)
 	{
-		moveTail();
+		if (!inWall)
+		{
+			moveTail();
 
-		velocity.y += gravityModifier;
-		head.move(velocity);
+			velocity.y += gravityModifier;
+			head.move(velocity);
 
-		checkGameBounds();
+			checkGameBounds();
+
+			if (t_player.getActive())
+			{
+				playerCollisions(t_player);
+			}
+
+			if (health <= 0)
+			{
+				active = false;
+			}
+		}
+		else
+		{
+			jumpAttack();
+		}
 	}
-	
 }
 
 // Move the tail segments to follow the head
@@ -116,8 +166,41 @@ void Earthworm::checkGameBounds()
 	// no longer active if the last segment of the tail goes outside the screen
 	if (tail[TAIL_LENGTH - 1].getPosition().x < 0.0f || tail[TAIL_LENGTH - 1].getPosition().x > WINDOW_WIDTH)
 	{
-		active = false;
+		inWall = true;
 	}
+}
+
+// Manage collisions between the player and worm
+void Earthworm::playerCollisions(Player & t_player)
+{
+	if (isColliding(t_player.getBody()))
+	{
+		t_player.damage(1, 30);
+	}
+}
+
+// Check for all parts of the worm colliding against another sprite
+bool Earthworm::isColliding(sf::Sprite t_collider)
+{
+	bool colliding = false;
+
+	if (head.getGlobalBounds().intersects(t_collider.getGlobalBounds())) // If the head collides with the other object colliding is true
+	{
+		colliding = true;
+	}
+	else // Only check collisions with the tail if not already collided
+	{
+		for (int i = 0; i < TAIL_LENGTH; i++) // Check collisions with the other object against all segments of the tail
+		{
+			if (tail[i].getGlobalBounds().intersects(t_collider.getGlobalBounds()))
+			{
+				colliding = true;
+				break; // Break out of the loop if alreay colliding
+			}
+		}
+	}
+
+	return colliding;
 }
 
 // Draw all parts of the worm

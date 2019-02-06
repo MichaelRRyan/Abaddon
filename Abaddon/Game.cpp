@@ -180,7 +180,7 @@ void Game::update(float t_delta)
 		crow.setup(); // Setup the crow again (respawn it)
 	}
 
-	if (!earthworm.getActive() /*&& rand() % 420*/)
+	if (!earthworm.getActive() && rand() % 240 == 0)
 	{
 		earthworm.spawn();
 	}
@@ -208,10 +208,15 @@ void Game::update(float t_delta)
 				crow.changeHealth(-bullets[i].getDamage()); // Damage the crow
 				bullets[i].setActive(false); // Deactivate the colliding bullet
 			}
+			if (earthworm.isColliding(bullets[i].getBody()) && earthworm.getActive()) // If the crow is active and the colliding with a bullet
+			{
+				earthworm.changeHealth(-bullets[i].getDamage()); // Damage the crow
+				bullets[i].setActive(false); // Deactivate the colliding bullet
+			}
 		}
 	}
 
-	earthworm.update();
+	earthworm.update(player);
 
 	// Update the score and text
 	if (m_gameActive)

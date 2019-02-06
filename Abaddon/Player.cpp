@@ -160,8 +160,11 @@ void Player::wallCollisions()
 // Deal damage to the player and freeze movement for an amount of time
 void Player::damage(int t_damageValue, int t_freezeTime)
 {
-	movementLockTimer = t_freezeTime;
-	health -= t_damageValue;
+	if (movementLockTimer <= 0)
+	{
+		movementLockTimer = t_freezeTime;
+		health -= t_damageValue;
+	}
 }
 
 void Player::draw(sf::RenderWindow & t_window)
