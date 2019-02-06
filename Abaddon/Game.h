@@ -10,8 +10,7 @@
 #include "Crow.h"
 #include "Bullet.h"
 #include "Earthworm.h"
-
-const int MAX_BULLETS{ 10 };
+#include "Gun.h"
 
 class Game
 {
@@ -21,7 +20,6 @@ public:
 	void run();
 private:
 	void processEvents();
-	void fireBullet(sf::Event t_mouseEvent);
 	void loadContent();
 	void update(float t_delta);
 	void render();
@@ -46,7 +44,8 @@ private:
 	Player player;
 	Crow crow;
 	Earthworm earthworm;
-	Bullet bullets[MAX_BULLETS];
+	Gun playerGun;
+	
 
 	// Declare UI components
 	sf::Font m_impactFont;

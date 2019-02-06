@@ -11,7 +11,7 @@ Bullet::Bullet()
 
 void Bullet::loadFiles()
 {
-	if (!spriteTexture.loadFromFile("ASSETS\\IMAGES\\fireball_right.png"))
+	if (!spriteTexture.loadFromFile("ASSETS\\IMAGES\\bullet.png"))
 	{
 		// Error loading fireball image
 	}

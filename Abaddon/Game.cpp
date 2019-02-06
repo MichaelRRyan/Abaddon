@@ -11,7 +11,11 @@
 /// Session 2: 16:13 - 18:21 - 01/02/2019
 /// Session 3: 09:04 - 10:56 - 04/02/2019 // Added earthworm and cleaned code
 /// Session 4: 20:14 - 21:00 - 04/02/2019 // Added spawn functionality to the earthworm and cleaned up code
+/// Session 5: 16:03 - 17:10 - 06/02/2019 // Added a gun class to clean up bullets
 ///
+/// ----------------------------------------------------------------------------
+/// Issues
+/// - Bullets don't work currently (Speed being changed)
 
 //////////////////////////////////////////////////////////// ////
 // include correct library file for release and debug versions //
@@ -98,26 +102,12 @@ void Game::processEvents()
 		{
 			if (nextEvent.mouseButton.button == sf::Mouse::Left)
 			{
-				fireBullet(nextEvent);
+				if (player.getActive())
+				{
+					sf::Vector2i mousePosition = { nextEvent.mouseButton.x, nextEvent.mouseButton.y };
+					playerGun.fireBullet(player.getPosition(), static_cast<sf::Vector2f>(mousePosition));
+				}
 			}
-		}
-	}
-}
-
-void Game::fireBullet(sf::Event t_mouseEvent)
-{
-	sf::Vector2i mousePosition = { t_mouseEvent.mouseButton.x, t_mouseEvent.mouseButton.y };
-	sf::Vector2f distanceVector = static_cast<sf::Vector2f>(mousePosition) - player.getPosition();
-	float distanceMagnitude = sqrt(distanceVector.x * distanceVector.x + distanceVector.y * distanceVector.y);
-	sf::Vector2f bulletDirection = distanceVector / distanceMagnitude;
-
-	// Loop to find a non active bullet to fire
-	for (int i = 0; i < MAX_BULLETS; i++)
-	{
-		if (!bullets[i].getActive())
-		{
-			bullets[i].intialise(player.getPosition(), bulletDirection, 5.0f, 1);
-			break;
 		}
 	}
 }
@@ -196,25 +186,8 @@ void Game::update(float t_delta)
 		crow.update(player, m_score);
 	}
 
-	// Update all active bullets
-	for (int i = 0; i < MAX_BULLETS; i++)
-	{
-		if (bullets[i].getActive()) // If the current bullet is active
-		{
-			bullets[i].update(); // Update the bullet
-
-			if (bullets[i].isColliding(crow.getBody()) && crow.getActive()) // If the crow is active and the colliding with a bullet
-			{
-				crow.changeHealth(-bullets[i].getDamage()); // Damage the crow
-				bullets[i].setActive(false); // Deactivate the colliding bullet
-			}
-			if (earthworm.isColliding(bullets[i].getBody()) && earthworm.getActive()) // If the crow is active and the colliding with a bullet
-			{
-				earthworm.changeHealth(-bullets[i].getDamage()); // Damage the crow
-				bullets[i].setActive(false); // Deactivate the colliding bullet
-			}
-		}
-	}
+	// Update all active player bullets
+	playerGun.updateBullets(crow, earthworm);
 
 	earthworm.update(player);
 
@@ -244,10 +217,7 @@ void Game::render()
 	earthworm.draw(m_window);
 
 	// Draw the bullets
-	for (int i = 0; i < MAX_BULLETS; i++)
-	{
-		bullets[i].draw(m_window);
-	}
+	playerGun.drawBullets(m_window);
 
 	// Draw the game world
 	m_window.draw(m_leftWall);
