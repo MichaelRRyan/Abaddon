@@ -3,10 +3,10 @@
 
 Gun::Gun()
 {
-	float speed = 10.0f;
-	int damage = 1;
-	int coolDown = 30; // The cooldown everytime a bullet is fired
-	int coolDownTimer = 0; // The current cooldown until another bullet can be fired
+	speed = 10.0f;
+	damage = 1;
+	coolDown = 30; // The cooldown everytime a bullet is fired
+	coolDownTimer = 0; // The current cooldown until another bullet can be fired
 }
 
 void Gun::fireBullet(sf::Vector2f t_position, sf::Vector2f t_target)

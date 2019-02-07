@@ -22,6 +22,8 @@ void Player::setup()
 	velocity = { 0.0f,0.0f };
 	friction = 0.96f;
 	movementLockTimer = 0;
+
+	active = true;
 }
 
 // Load and set up the files
@@ -85,41 +87,44 @@ void Player::moveRight()
 // Update the player
 void Player::update()
 {
-	if (movementLockTimer <= 0)
+	if (active)
 	{
-		body.setColor(sf::Color::White);
-
-		if (vectorLength(moveDir) != 0.0f) // If the player has moved, update their velocity
+		if (movementLockTimer <= 0)
 		{
-			if (moveDir.x == 0.0f) // If the player hasn't moved horisontally, only update the vertical axis
+			body.setColor(sf::Color::White);
+
+			if (vectorLength(moveDir) != 0.0f) // If the player has moved, update their velocity
 			{
-				velocity.y = moveDir.y * speed;
-			}
-			else if (moveDir.y == 0.0f) // If the player hasn't moved vertically, only update the horisontal axis
-			{
-				velocity.x = moveDir.x * speed;
-			}
-			else // If the player moved along both axis, set the velocity to the direction times speed to keep movement equal
-			{
-				velocity = vectorUnitVector(moveDir) * speed;
+				if (moveDir.x == 0.0f) // If the player hasn't moved horisontally, only update the vertical axis
+				{
+					velocity.y = moveDir.y * speed;
+				}
+				else if (moveDir.y == 0.0f) // If the player hasn't moved vertically, only update the horisontal axis
+				{
+					velocity.x = moveDir.x * speed;
+				}
+				else // If the player moved along both axis, set the velocity to the direction times speed to keep movement equal
+				{
+					velocity = vectorUnitVector(moveDir) * speed;
+				}
 			}
 		}
-	}
-	else
-	{
-		body.setColor(sf::Color::Red);
-		movementLockTimer--;
-	}
+		else
+		{
+			body.setColor(sf::Color::Red);
+			movementLockTimer--;
+		}
 
-	velocity *= friction; // Apply friction
-	body.move(velocity); // Move the player by the velocity
-	moveDir = { 0.0f, 0.0f }; // Reset the move direction for next frame
+		velocity *= friction; // Apply friction
+		body.move(velocity); // Move the player by the velocity
+		moveDir = { 0.0f, 0.0f }; // Reset the move direction for next frame
 
-	wallCollisions();
+		wallCollisions();
 
-	if (health <= 0)
-	{
-		die();
+		if (health <= 0)
+		{
+			die();
+		}
 	}
 }
 

@@ -25,12 +25,15 @@ private:
 	void render();
 	bool checkMoveInput(int t_direction); // Checks for input and returns the correct direction to allow for multiple movement keys
 	void manageMovement(); // Send the input to the player object
+	void respawnEnemies(); // Respawn the enemies
 	
 	sf::RenderWindow m_window;
 	bool m_exitGame;
+	enum GameStates { MainMenu, GamePlaying, Pause, Restart };
 
 	// Game control
 	bool m_gameActive{ true };
+	GameStates m_gameState{ GamePlaying };
 	float m_score{ 0 };
 
 	// Setup the shapes
@@ -39,6 +42,7 @@ private:
 
 	sf::RectangleShape m_healthBar;
 	sf::RectangleShape m_statusBar;
+	sf::RectangleShape m_miniMenu;
 
 	// Setup the game objects
 	Player player;
@@ -50,6 +54,8 @@ private:
 	// Declare UI components
 	sf::Font m_impactFont;
 	sf::Text m_scoreText;
+	sf::Text m_gameOverText;
+	sf::Text m_restartText;
 };
 
 

@@ -38,27 +38,30 @@ void Crow::loadFiles()
 // Update the crow and manage the behaviour
 void Crow::update(Player & t_player, float & t_score)
 {
-	if (behaviour == Standby || behaviour == Patrol) // If the behaviour is in standby or patrol, run patrol
+	if (active)
 	{
-		patrol(t_player);
-	}
-	else
-	{
-		dive(t_player);
-	}
+		if (behaviour == Standby || behaviour == Patrol) // If the behaviour is in standby or patrol, run patrol
+		{
+			patrol(t_player);
+		}
+		else
+		{
+			dive(t_player);
+		}
 
-	wallCollisions();
+		wallCollisions();
 
-	float angle = atan2f(velocity.y, velocity.x) * 180 / 3.14f;
-	body.setRotation(angle);
+		float angle = atan2f(velocity.y, velocity.x) * 180 / 3.14f;
+		body.setRotation(angle);
 
-	body.move(velocity);
+		body.move(velocity);
 
-	// Check if still alive
-	if (health <= 0)
-	{
-		active = false;
-		t_score += 10;
+		// Check if still alive
+		if (health <= 0)
+		{
+			active = false;
+			t_score += 10;
+		}
 	}
 }
 

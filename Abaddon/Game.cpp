@@ -98,14 +98,28 @@ void Game::processEvents()
 		{
 			m_window.close();
 		}
-		if (nextEvent.type == sf::Event::MouseButtonPressed)
+		if (player.getActive())
 		{
-			if (nextEvent.mouseButton.button == sf::Mouse::Left)
+			if (nextEvent.type == sf::Event::MouseButtonPressed)
 			{
-				if (player.getActive())
+				if (nextEvent.mouseButton.button == sf::Mouse::Left)
 				{
 					sf::Vector2i mousePosition = { nextEvent.mouseButton.x, nextEvent.mouseButton.y };
 					playerGun.fireBullet(player.getPosition(), static_cast<sf::Vector2f>(mousePosition));
+				}
+			}
+		}
+		if (m_gameState == Restart)
+		{
+			if (nextEvent.type == sf::Event::KeyPressed)
+			{
+				if (nextEvent.key.code == sf::Keyboard::R)
+				{
+					player.setup();
+					earthworm.spawn();
+					crow.setup();
+					m_score = 0.0f;
+					m_gameState = GamePlaying;
 				}
 			}
 		}
@@ -127,6 +141,22 @@ void Game::loadContent()
 	m_scoreText.setOutlineColor(sf::Color::Black);
 	m_scoreText.setOutlineThickness(1.0f);
 	m_scoreText.setString("SCORE: ");
+
+	m_gameOverText.setFont(m_impactFont);
+	m_gameOverText.setPosition(WINDOW_WIDTH / 2 - 90.0f, WINDOW_HEIGHT / 2 - 150.0f);
+	m_gameOverText.setCharacterSize(50u);
+	m_gameOverText.setFillColor(sf::Color::Red);
+	m_gameOverText.setOutlineColor(sf::Color::Black);
+	m_gameOverText.setOutlineThickness(0.5f);
+	m_gameOverText.setString("YOU DIED");
+
+	m_restartText.setFont(m_impactFont);
+	m_restartText.setPosition(WINDOW_WIDTH / 2 - 120.0f, WINDOW_HEIGHT / 2);
+	m_restartText.setCharacterSize(30u);
+	m_restartText.setFillColor(sf::Color::White);
+	m_restartText.setOutlineColor(sf::Color::Black);
+	m_restartText.setOutlineThickness(0.5f);
+	m_restartText.setString("Press 'R' To Restart");
 
 	m_leftWall.setPosition(0.0f, 0.0f);
 	m_rightWall.setPosition(WINDOW_WIDTH - WALL_WIDTH, 0.0f);
@@ -150,6 +180,12 @@ void Game::loadContent()
 	m_statusBar.setOutlineColor(sf::Color::Black);
 	m_statusBar.setOutlineThickness(2.0f);
 
+	m_miniMenu.setSize(sf::Vector2f{ 400.0f, 500.0f });
+	m_miniMenu.setPosition(100.0f, 150.0f);
+	m_miniMenu.setFillColor(sf::Color{ 50, 160, 85, 155 });
+	m_miniMenu.setOutlineColor(sf::Color::Black);
+	m_miniMenu.setOutlineThickness(2.0f);
+
 	earthworm.spawn();
 }
 
@@ -161,48 +197,41 @@ void Game::update(float t_delta)
 		m_window.close();
 	}
 
-
-	// Respawn the crow if not already active
-	if (!crow.getActive() && rand() % 120 == 0)
-	{
-		float randomX = rand() / float(RAND_MAX) * (WINDOW_HEIGHT - WALL_WIDTH * 2) - WALL_WIDTH; // Get a random float value with the range of the active screen width
-		crow.setPosition(randomX, WINDOW_HEIGHT_BEGINNING); // Set the position of the crow
-		crow.setup(); // Setup the crow again (respawn it)
-	}
-
-	if (!earthworm.getActive() && rand() % 240 == 0)
-	{
-		earthworm.spawn();
-	}
-
-	manageMovement(); // Manage the input and move the player accordingly
-
-	if (player.getActive()) // If the player is alive
-	{
-		player.update();
-	}
-	if (crow.getActive()) // update the crow if active
-	{
-		crow.update(player, m_score);
-	}
-
-	// Update all active player bullets
-	playerGun.updateBullets(crow, earthworm);
-
-	earthworm.update(player);
-
 	// Update the score and text
-	if (m_gameActive)
+	switch (m_gameState)
 	{
+	case Game::MainMenu:
+		break;
+	case Game::GamePlaying: // Game playing state
+
+		manageMovement(); // Manage the input and move the player accordingly
+		player.update(); // Update the player when active
+		playerGun.updateBullets(crow, earthworm); // Update all active player bullets
+
+		crow.update(player, m_score); // Update the crow when active
+		earthworm.update(player); // Update the earthworm when active
+
 		m_score += 5 / t_delta;
 		m_scoreText.setString("SCORE: " + std::to_string(static_cast<int>(m_score)));
-	}
+		m_healthBar.setScale(static_cast<float>(1.0f * player.getHealth() / MAX_HEALTH), 1.0f); // Update the healthbar GUI
 
-	m_healthBar.setScale(static_cast<float>(1.0f * player.getHealth() / MAX_HEALTH), 1.0f); // Update the healthbar GUI
+		if (!player.getActive())
+		{
+			m_gameState = Restart;
 
-	if (!player.getActive())
-	{
-		m_gameActive = false;
+		}
+
+		respawnEnemies();
+		break;
+	case Game::Pause:
+		break;
+	case Game::Restart: // Restart menu
+
+		playerGun.updateBullets(crow, earthworm); // Update all active player bullets
+		crow.update(player, m_score); // Update the crow when active
+		earthworm.update(player); // Update the earthworm when active
+
+		break;
 	}
 }
 
@@ -227,6 +256,13 @@ void Game::render()
 	m_window.draw(m_statusBar);
 	m_window.draw(m_scoreText);
 	m_window.draw(m_healthBar);
+
+	if (m_gameState == Restart)
+	{
+		m_window.draw(m_miniMenu);
+		m_window.draw(m_gameOverText);
+		m_window.draw(m_restartText);
+	}
 
 	m_window.display();
 }
@@ -302,5 +338,23 @@ void Game::manageMovement()
 	if (checkMoveInput(EAST) && !checkMoveInput(WEST)) // Check that the right movement is true and left movement is false
 	{
 		player.moveRight();
+	}
+}
+
+// Respawn inactive/dead enemies
+void Game::respawnEnemies()
+{
+	// Respawn the crow if not already active
+	if (!crow.getActive() && rand() % 120 == 0)
+	{
+		float randomX = rand() / float(RAND_MAX) * (WINDOW_HEIGHT - WALL_WIDTH * 2) - WALL_WIDTH; // Get a random float value with the range of the active screen width
+		crow.setPosition(randomX, WINDOW_HEIGHT_BEGINNING); // Set the position of the crow
+		crow.setup(); // Setup the crow again (respawn it)
+	}
+
+	// Respawn the worm
+	if (!earthworm.getActive() && rand() % 240 == 0)
+	{
+		earthworm.spawn();
 	}
 }
