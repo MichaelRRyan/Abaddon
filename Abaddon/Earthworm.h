@@ -34,7 +34,8 @@ public:
 	bool isColliding(sf::Sprite t_collider);
 	void draw(sf::RenderWindow & t_window);
 
-	inline bool getActive() { return active; }
+	inline bool getActive() { return active; } // Return the active state of the object
+	inline void setActive(bool t_active) { active = t_active; } // Set the active state of the object
 	inline void changeHealth(int t_changeAmount) { health += t_changeAmount; } // Change the health of the crow by the inputted value
 };
 

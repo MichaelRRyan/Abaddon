@@ -19,8 +19,8 @@ class Gun
 public:
 	Gun();
 	void fireBullet(sf::Vector2f t_position, sf::Vector2f t_target);
-	void updateBullets(Crow & t_crow, Earthworm & t_eartworm);
-	void checkBulletCollisions(Bullet & t_bullet, Crow & t_crow, Earthworm & t_eartworm);
+	void updateBullets(Crow t_crows[], int t_maxCrows ,Earthworm t_eartworms[], int t_maxEarthworms);
+	void checkBulletCollisions(Bullet & t_bullet, Crow t_crows[], int t_maxCrows, Earthworm t_eartworms[], int t_maxEarthworms);
 	void drawBullets(sf::RenderWindow & t_window);
 	Bullet getBullet(int t_num);
 	inline int getNumberOfBullets() { return MAX_BULLETS; }

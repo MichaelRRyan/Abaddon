@@ -21,17 +21,21 @@ void Crow::setup()
 	diveHeight = 200.0f;
 	attackDamage = 1;
 	active = true;
+
+	frameNum = 0;
+	frameDelay = 6;
 }
 
 // Load the files and setup the sprite
 void Crow::loadFiles()
 {
-	if (!spriteSheet.loadFromFile("ASSETS\\IMAGES\\enemy1_down.png"))
+	if (!spriteSheet.loadFromFile("ASSETS\\IMAGES\\crows.png"))
 	{
 		// Error can't load file
 	}
 
 	body.setTexture(spriteSheet);
+	body.setTextureRect(sf::IntRect{ 0, 0, 110, 95 });
 	body.setOrigin(body.getGlobalBounds().width / 2, body.getGlobalBounds().height / 2);
 }
 
@@ -43,18 +47,22 @@ void Crow::update(Player & t_player, float & t_score)
 		if (behaviour == Standby || behaviour == Patrol) // If the behaviour is in standby or patrol, run patrol
 		{
 			patrol(t_player);
+			animateSprite(); // Animate the sprite
 		}
-		else
+		if (behaviour == PrepareToDive || behaviour == Dive)
 		{
 			dive(t_player);
+			body.setTextureRect(sf::IntRect{ 270, 95, 110, 95 });
 		}
 
-		wallCollisions();
+		// Find and set the correct rotation for the sprite
+		float angle = atan2f(velocity.y, sqrt(velocity.x * velocity.x)) * 180 / 3.14f; // Get the vertical rotation angle
+		
+		(velocity.x < 0) ? body.setScale(-1.0f, 1.0f) : body.setScale(1.0f, 1.0f); // Choose which side the sprite should face
+		body.setRotation(angle);													 // Rotate vertically
 
-		float angle = atan2f(velocity.y, velocity.x) * 180 / 3.14f;
-		body.setRotation(angle);
-
-		body.move(velocity);
+		body.move(velocity); // Move the object by its velocity
+		wallCollisions(); // Checl for collisions with the walls
 
 		// Check if still alive
 		if (health <= 0)
@@ -157,4 +165,18 @@ void Crow::draw(sf::RenderWindow & t_window)
 	{
 		t_window.draw(body);
 	}
+}
+
+void Crow::animateSprite()
+{
+	if (frameNum > 4 * frameDelay)
+	{
+		frameNum = 0;
+	}
+
+	int imageNum = frameNum / frameDelay;
+
+	body.setTextureRect(sf::IntRect{ 110 * imageNum, 0, 110, 95 });
+
+	frameNum++;
 }

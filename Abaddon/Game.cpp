@@ -12,6 +12,7 @@
 /// Session 3: 09:04 - 10:56 - 04/02/2019 // Added earthworm and cleaned code
 /// Session 4: 20:14 - 21:00 - 04/02/2019 // Added spawn functionality to the earthworm and cleaned up code
 /// Session 5: 16:03 - 17:10 - 06/02/2019 // Added a gun class to clean up bullets
+/// Session 6: 10:40 - 12:03 - 09/02/2019 // Added arrays of enemies and changed crow sprite
 ///
 /// ----------------------------------------------------------------------------
 /// Issues
@@ -56,6 +57,7 @@ Game::Game() :
 	m_exitGame{ false }
 {
 	loadContent();
+	setupGame(); // Restart/setup the game
 }
 
 // Default destructer
@@ -115,11 +117,7 @@ void Game::processEvents()
 			{
 				if (nextEvent.key.code == sf::Keyboard::R)
 				{
-					player.setup();
-					earthworm.spawn();
-					crow.setup();
-					m_score = 0.0f;
-					m_gameState = GamePlaying;
+					setupGame();
 				}
 			}
 		}
@@ -185,8 +183,6 @@ void Game::loadContent()
 	m_miniMenu.setFillColor(sf::Color{ 50, 160, 85, 155 });
 	m_miniMenu.setOutlineColor(sf::Color::Black);
 	m_miniMenu.setOutlineThickness(2.0f);
-
-	earthworm.spawn();
 }
 
 // Updates the game world
@@ -206,10 +202,8 @@ void Game::update(float t_delta)
 
 		manageMovement(); // Manage the input and move the player accordingly
 		player.update(); // Update the player when active
-		playerGun.updateBullets(crow, earthworm); // Update all active player bullets
-
-		crow.update(player, m_score); // Update the crow when active
-		earthworm.update(player); // Update the earthworm when active
+		
+		updateNonPlayer();
 
 		m_score += 5 / t_delta;
 		m_scoreText.setString("SCORE: " + std::to_string(static_cast<int>(m_score)));
@@ -227,9 +221,7 @@ void Game::update(float t_delta)
 		break;
 	case Game::Restart: // Restart menu
 
-		playerGun.updateBullets(crow, earthworm); // Update all active player bullets
-		crow.update(player, m_score); // Update the crow when active
-		earthworm.update(player); // Update the earthworm when active
+		updateNonPlayer();
 
 		break;
 	}
@@ -242,8 +234,18 @@ void Game::render()
 
 	// Draw the game characters
 	player.draw(m_window);
-	crow.draw(m_window);
-	earthworm.draw(m_window);
+
+	// Draw the crows
+	for (int i = 0; i < MAX_CROWS; i++)
+	{
+		crows[i].draw(m_window);
+	}
+	
+	// Draw the earthworms
+	for (int i = 0; i < MAX_EARTHWORMS; i++)
+	{
+		earthworms[i].draw(m_window);
+	}
 
 	// Draw the bullets
 	playerGun.drawBullets(m_window);
@@ -345,16 +347,64 @@ void Game::manageMovement()
 void Game::respawnEnemies()
 {
 	// Respawn the crow if not already active
-	if (!crow.getActive() && rand() % 120 == 0)
+	if (rand() % 120 == 0)
 	{
-		float randomX = rand() / float(RAND_MAX) * (WINDOW_HEIGHT - WALL_WIDTH * 2) - WALL_WIDTH; // Get a random float value with the range of the active screen width
-		crow.setPosition(randomX, WINDOW_HEIGHT_BEGINNING); // Set the position of the crow
-		crow.setup(); // Setup the crow again (respawn it)
+		for (int i = 0; i < MAX_CROWS; i++)
+		{
+			if (!crows[i].getActive())
+			{
+				float randomX = rand() / float(RAND_MAX) * (WINDOW_HEIGHT - WALL_WIDTH * 2) - WALL_WIDTH; // Get a random float value with the range of the active screen width
+				crows[i].setPosition(randomX, WINDOW_HEIGHT_BEGINNING); // Set the position of the crow
+				crows[i].setup(); // Setup the crow again (respawn it)
+				break;
+			}
+		}
 	}
 
 	// Respawn the worm
-	if (!earthworm.getActive() && rand() % 240 == 0)
+	if (rand() % 240 == 0)
 	{
-		earthworm.spawn();
+		for (int i = 0; i < MAX_EARTHWORMS; i++)
+		{
+			if (!earthworms[i].getActive())
+			{
+				earthworms[i].spawn();
+				break;
+			}
+		}
+	}
+}
+
+void Game::setupGame()
+{
+	player.setup();
+	for (int i = 0; i < MAX_CROWS; i++)
+	{
+		crows[i].setActive(false);
+	}
+	for (int i = 0; i < MAX_EARTHWORMS; i++)
+	{
+		earthworms[i].setActive(false);
+	}
+
+	m_score = 0.0f;
+	m_gameState = GamePlaying;
+}
+
+// Update the non player objects
+void Game::updateNonPlayer()
+{
+	playerGun.updateBullets(crows, MAX_CROWS, earthworms, MAX_EARTHWORMS); // Update all active player bullets
+
+	// Update all the crows
+	for (int i = 0; i < MAX_CROWS; i++)
+	{
+		crows[i].update(player, m_score); // Update the crow when active
+	}
+
+	// Update all the earthworms
+	for (int i = 0; i < MAX_EARTHWORMS; i++)
+	{
+		earthworms[i].update(player); // Update the earthworm when active
 	}
 }
