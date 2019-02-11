@@ -127,6 +127,7 @@
     <ClInclude Include="Game.h" />
     <ClInclude Include="Globals.h" />
     <ClInclude Include="Gun.h" />
+    <ClInclude Include="Menu.h" />
     <ClInclude Include="MyVector2.h" />
     <ClInclude Include="Player.h" />
   </ItemGroup>
@@ -136,6 +137,7 @@
     <ClCompile Include="Earthworm.cpp" />
     <ClCompile Include="Game.cpp" />
     <ClCompile Include="Gun.cpp" />
+    <ClCompile Include="Menu.cpp" />
     <ClCompile Include="MyVector2.cpp" />
     <ClCompile Include="Player.cpp" />
   </ItemGroup>

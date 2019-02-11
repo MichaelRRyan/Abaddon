@@ -212,6 +212,8 @@ void Game::update(float t_delta)
 		if (!player.getActive())
 		{
 			m_gameState = Restart;
+			m_scoreText.setPosition(WINDOW_WIDTH / 2.0f - 85.0f, WINDOW_HEIGHT / 2.0f - 75.0f);
+			m_scoreText.setCharacterSize(40u);
 
 		}
 
@@ -256,7 +258,6 @@ void Game::render()
 
 	// Draw the GUI
 	m_window.draw(m_statusBar);
-	m_window.draw(m_scoreText);
 	m_window.draw(m_healthBar);
 
 	if (m_gameState == Restart)
@@ -264,6 +265,13 @@ void Game::render()
 		m_window.draw(m_miniMenu);
 		m_window.draw(m_gameOverText);
 		m_window.draw(m_restartText);
+	}
+
+	m_window.draw(m_scoreText);
+
+	if (m_gameState == MainMenu)
+	{
+		mainMenu.drawMenu(m_window);
 	}
 
 	m_window.display();
@@ -387,6 +395,8 @@ void Game::setupGame()
 		earthworms[i].setActive(false);
 	}
 
+	m_scoreText.setPosition(WINDOW_WIDTH / 2 - 70.0f, 50.0f);
+	m_scoreText.setCharacterSize(30u);
 	m_score = 0.0f;
 	m_gameState = GamePlaying;
 }

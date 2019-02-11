@@ -11,6 +11,7 @@
 #include "Bullet.h"
 #include "Earthworm.h"
 #include "Gun.h"
+#include "Menu.h"
 
 const int MAX_CROWS{ 5 };
 const int MAX_EARTHWORMS{ 3 };
@@ -38,7 +39,7 @@ private:
 
 	// Game control
 	bool m_gameActive{ true };
-	GameStates m_gameState{ GamePlaying };
+	GameStates m_gameState{ MainMenu };
 	float m_score{ 0 };
 
 	// Setup the shapes
@@ -54,6 +55,8 @@ private:
 	Crow crows[MAX_CROWS];
 	Earthworm earthworms[MAX_EARTHWORMS];
 	Gun playerGun;
+
+	Menu mainMenu;
 	
 
 	// Declare UI components
