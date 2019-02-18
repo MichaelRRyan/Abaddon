@@ -40,7 +40,8 @@ private:
 	// Game control
 	bool m_gameActive{ true };
 	GameStates m_gameState{ MainMenu };
-	float m_score{ 0 };
+	float m_score{ 0.0f }; // Changes with distance and when killing enemies
+	float m_distance{ 0.0f }; // The distance the player has travelled since the game beginning. Similiar to score
 
 	// Setup the shapes
 	sf::RectangleShape m_leftWall;
@@ -57,7 +58,6 @@ private:
 	Gun playerGun;
 
 	Menu mainMenu;
-	
 
 	// Declare UI components
 	sf::Font m_impactFont;

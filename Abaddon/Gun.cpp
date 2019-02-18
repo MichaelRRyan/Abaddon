@@ -5,7 +5,7 @@ Gun::Gun()
 {
 	speed = 10.0f;
 	damage = 2;
-	coolDown = 30; // The cooldown everytime a bullet is fired
+	coolDown = 15; // The cooldown everytime a bullet is fired
 	coolDownTimer = 0; // The current cooldown until another bullet can be fired
 }
 

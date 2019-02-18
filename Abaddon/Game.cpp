@@ -206,6 +206,7 @@ void Game::update(float t_delta)
 		updateNonPlayer();
 
 		m_score += 5 / t_delta;
+		m_distance += 5 / t_delta;
 		m_scoreText.setString("SCORE: " + std::to_string(static_cast<int>(m_score)));
 		m_healthBar.setScale(static_cast<float>(1.0f * player.getHealth() / MAX_HEALTH), 1.0f); // Update the healthbar GUI
 
@@ -354,15 +355,34 @@ void Game::manageMovement()
 // Respawn inactive/dead enemies
 void Game::respawnEnemies()
 {
+	int maxSpawnTimeModifier = 8;
+	int crowSpawnTime = 60; // Minimum crow spawn time
+	int wormSpawnTime = 120; // Minimum worm spawn time
+
+	// Decrease spawn time as game goes on
+	int respawnMax = m_distance / 5.0f; // Get a fraction of the distance travelled
+
+	int potentialSpawnTime = crowSpawnTime * maxSpawnTimeModifier - respawnMax;
+	if (crowSpawnTime < potentialSpawnTime)
+	{
+		crowSpawnTime = potentialSpawnTime;
+	}
+
+	potentialSpawnTime = wormSpawnTime * maxSpawnTimeModifier - respawnMax;
+	if (wormSpawnTime < potentialSpawnTime)
+	{
+		wormSpawnTime = potentialSpawnTime;
+	}
+
 	// Respawn the crow if not already active
-	if (rand() % 120 == 0)
+	if (rand() % crowSpawnTime == 0)
 	{
 		for (int i = 0; i < MAX_CROWS; i++)
 		{
 			if (!crows[i].getActive())
 			{
 				float randomX = rand() / float(RAND_MAX) * (WINDOW_HEIGHT - WALL_WIDTH * 2) - WALL_WIDTH; // Get a random float value with the range of the active screen width
-				crows[i].setPosition(randomX, WINDOW_HEIGHT_BEGINNING); // Set the position of the crow
+				crows[i].setPosition(randomX, WINDOW_HEIGHT_BEGINNING + crows[i].getBody().getGlobalBounds().height / 2); // Set the position of the crow
 				crows[i].setup(); // Setup the crow again (respawn it)
 				break;
 			}
@@ -370,7 +390,7 @@ void Game::respawnEnemies()
 	}
 
 	// Respawn the worm
-	if (rand() % 240 == 0)
+	if (rand() % wormSpawnTime == 0)
 	{
 		for (int i = 0; i < MAX_EARTHWORMS; i++)
 		{
@@ -398,6 +418,7 @@ void Game::setupGame()
 	m_scoreText.setPosition(WINDOW_WIDTH / 2 - 70.0f, 50.0f);
 	m_scoreText.setCharacterSize(30u);
 	m_score = 0.0f;
+	m_distance = 0.0f;
 	m_gameState = GamePlaying;
 }
 
