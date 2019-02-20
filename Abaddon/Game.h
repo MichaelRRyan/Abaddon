@@ -12,6 +12,7 @@
 #include "Earthworm.h"
 #include "Gun.h"
 #include "Menu.h"
+#include "Obstacle.h"
 
 const int MAX_CROWS{ 5 };
 const int MAX_EARTHWORMS{ 3 };
@@ -30,8 +31,9 @@ private:
 	bool checkMoveInput(int t_direction); // Checks for input and returns the correct direction to allow for multiple movement keys
 	void manageMovement(); // Send the input to the player object
 	void respawnEnemies(); // Respawn the enemies
-	void setupGame();
+	void setupGame(); // Setup the game
 	void updateNonPlayer(); // Update the non player objects
+	void manageCollisions(); // Manage the game collisions between all entities
 	
 	sf::RenderWindow m_window;
 	bool m_exitGame;
@@ -56,6 +58,7 @@ private:
 	Crow crows[MAX_CROWS];
 	Earthworm earthworms[MAX_EARTHWORMS];
 	Gun playerGun;
+	Obstacle obstacle;
 
 	Menu mainMenu;
 

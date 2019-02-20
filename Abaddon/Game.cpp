@@ -13,7 +13,7 @@
 /// Session 4: 20:14 - 21:00 - 04/02/2019 // Added spawn functionality to the earthworm and cleaned up code
 /// Session 5: 16:03 - 17:10 - 06/02/2019 // Added a gun class to clean up bullets
 /// Session 6: 10:40 - 12:03 - 09/02/2019 // Added arrays of enemies and changed crow sprite
-///
+/// Session 7: 09:09 - 10:58 - 20/02/2019 // Added obstacles and player collision radius
 /// ----------------------------------------------------------------------------
 /// Issues
 /// - Bullets don't work currently (Speed being changed)
@@ -199,6 +199,7 @@ void Game::update(float t_delta)
 	case Game::MainMenu:
 		break;
 	case Game::GamePlaying: // Game playing state
+		manageCollisions();
 
 		manageMovement(); // Manage the input and move the player accordingly
 		player.update(); // Update the player when active
@@ -252,6 +253,8 @@ void Game::render()
 
 	// Draw the bullets
 	playerGun.drawBullets(m_window);
+
+	obstacle.draw(m_window);
 
 	// Draw the game world
 	m_window.draw(m_leftWall);
@@ -401,6 +404,11 @@ void Game::respawnEnemies()
 			}
 		}
 	}
+
+	if (rand() % 120 == 0 && !obstacle.getActive())
+	{
+		obstacle.respawn();
+	}
 }
 
 void Game::setupGame()
@@ -414,6 +422,7 @@ void Game::setupGame()
 	{
 		earthworms[i].setActive(false);
 	}
+	obstacle.setActive(false);
 
 	m_scoreText.setPosition(WINDOW_WIDTH / 2 - 70.0f, 50.0f);
 	m_scoreText.setCharacterSize(30u);
@@ -425,6 +434,7 @@ void Game::setupGame()
 // Update the non player objects
 void Game::updateNonPlayer()
 {
+	obstacle.update();
 	playerGun.updateBullets(crows, MAX_CROWS, earthworms, MAX_EARTHWORMS); // Update all active player bullets
 
 	// Update all the crows
@@ -437,5 +447,14 @@ void Game::updateNonPlayer()
 	for (int i = 0; i < MAX_EARTHWORMS; i++)
 	{
 		earthworms[i].update(player); // Update the earthworm when active
+	}
+}
+
+void Game::manageCollisions()
+{
+	sf::Vector2f distanceVector = player.getPosition() - obstacle.getPosition();
+	if (vectorLength(distanceVector) < player.getCollisionRadius() + obstacle.getCollisionRadius())
+	{
+		player.damage(1, 15);
 	}
 }

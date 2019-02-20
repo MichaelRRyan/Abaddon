@@ -22,6 +22,7 @@ void Player::setup()
 	velocity = { 0.0f,0.0f };
 	friction = 0.96f;
 	movementLockTimer = 0;
+	collisionRadius = 30.0f;
 
 	active = true;
 }
@@ -36,52 +37,6 @@ void Player::loadFiles()
 
 	body.setTexture(spriteSheet);
 	body.setOrigin(body.getGlobalBounds().width / 2, body.getGlobalBounds().height / 2);
-}
-
-// Return the position of the object
-sf::Vector2f Player::getPosition()
-{
-	return body.getPosition();
-}
-
-// Return the body of the player
-sf::Sprite Player::getBody()
-{
-	return body;
-}
-
-int Player::getHealth()
-{
-	return health;
-}
-
-bool Player::getActive()
-{
-	return active;
-}
-
-// Move the player up
-void Player::moveUp()
-{
-	moveDir.y = -1.0f; // Set verticle move direction to up
-}
-
-// Move the player down
-void Player::moveDown()
-{
-	moveDir.y = 1.0f; // Set verticle move direction to down
-}
-
-// Move the player left
-void Player::moveLeft()
-{
-	moveDir.x = -1.0f; // Set horisontal move direction to left
-}
-
-// Move the player right
-void Player::moveRight()
-{
-	moveDir.x = 1.0f; // Set horisontal move direction to right
 }
 
 // Update the player
