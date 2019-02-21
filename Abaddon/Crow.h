@@ -8,23 +8,25 @@
 class Crow
 {
 	// Enum for behaviour state
-	static enum Behaviour { Standby, Patrol, PrepareToDive, Dive };
+	const enum Behaviour { Standby, Patrol, PrepareToDive, Dive };
 
 	// Declare private data members
 	sf::Texture spriteSheet;
 	sf::Sprite body;
 	sf::Vector2f velocity;
 	int health;
+	int attackDamage;
+	int frameNum; // Frame number used for animating the sprite
+	int frameDelay; // The delay between frame change
+	float collisionRadius; // The radius used to check crow collisions
 	float speed; // How fast the crow moves normally
 	float diveSpeed; // How fast the crow moves when diving for the player
-	Behaviour behaviour; // Controls which behaviour is run
 	float diveRange; // How close the player has to be along the x axis to the crow for it to dive
 	float diveHeight; // How far away the crow has to be along the y axis for the crow to dive
+	Behaviour behaviour; // Controls which behaviour is run
 	bool active;
-	int attackDamage;
 
-	int frameNum;
-	int frameDelay;
+	
 
 public:
 	// Public function members
@@ -42,6 +44,7 @@ public:
 	// Get functions
 	inline sf::Sprite getBody() { return body; } // Get the bodt component of the crow
 	inline bool getActive() { return active; } // Get the active state of the crow
+	float getCollisionRadius() { return collisionRadius; } // Return the collision radius
 
 	// Set/change functions
 	inline void setActive(bool t_active) { active = t_active; } // Set the active state of the object

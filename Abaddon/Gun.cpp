@@ -3,13 +3,23 @@
 
 Gun::Gun()
 {
+	setupSounds();
 	speed = 10.0f;
 	damage = 2;
 	coolDown = 15; // The cooldown everytime a bullet is fired
 	coolDownTimer = 0; // The current cooldown until another bullet can be fired
 }
 
-void Gun::fireBullet(sf::Vector2f t_position, sf::Vector2f t_target)
+void Gun::setupSounds()
+{
+	if (!gunshotSoundBuffer.loadFromFile("ASSETS\\AUDIO\\gunshot.wav"))
+	{
+		std::cout << "Error Loading Gunshot Sound";
+	}
+	gunshotSound.setBuffer(gunshotSoundBuffer);
+}
+
+void Gun::fireBullet(sf::Vector2f t_position, sf::Vector2f t_target, int & t_screenShakeTimer)
 {
 	if (coolDownTimer <= 0)
 	{
@@ -23,6 +33,8 @@ void Gun::fireBullet(sf::Vector2f t_position, sf::Vector2f t_target)
 			{
 				bullets[i].intialise(t_position, bulletDirection, speed, damage);
 				coolDownTimer = coolDown;
+				gunshotSound.play();
+				t_screenShakeTimer = 15; // screen shake for half a second
 				break;
 			}
 		}
@@ -63,7 +75,7 @@ void Gun::checkBulletCollisions(Bullet & t_bullet, Crow t_crows[], int t_maxCrow
 	// Check collisions against all earthworms
 	for (int i = 0; i < t_maxEarthworms; i++)
 	{
-		if (t_eartworms[i].isColliding(t_bullet.getBody()) && t_eartworms[i].getActive()) // If the crow is active and the colliding with a bullet
+		if (t_eartworms[i].isColliding(t_bullet.getPosition(), t_bullet.getCollisionRadius()) && t_eartworms[i].getActive()) // If the crow is active and the colliding with a bullet
 		{
 			t_eartworms[i].changeHealth(-t_bullet.getDamage()); // Damage the crow
 			t_bullet.setActive(false); // Deactivate the colliding bullet

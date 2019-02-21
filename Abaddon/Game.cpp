@@ -14,6 +14,8 @@
 /// Session 5: 16:03 - 17:10 - 06/02/2019 // Added a gun class to clean up bullets
 /// Session 6: 10:40 - 12:03 - 09/02/2019 // Added arrays of enemies and changed crow sprite
 /// Session 7: 09:09 - 10:58 - 20/02/2019 // Added obstacles and player collision radius
+/// Extra hours worked unmarked
+/// Estimated time taken: 18h
 /// ----------------------------------------------------------------------------
 /// Issues
 /// - Bullets don't work currently (Speed being changed)
@@ -107,7 +109,7 @@ void Game::processEvents()
 				if (nextEvent.mouseButton.button == sf::Mouse::Left)
 				{
 					sf::Vector2i mousePosition = { nextEvent.mouseButton.x, nextEvent.mouseButton.y };
-					playerGun.fireBullet(player.getPosition(), static_cast<sf::Vector2f>(mousePosition));
+					playerGun.fireBullet(player.getPosition(), static_cast<sf::Vector2f>(mousePosition), m_screenShakeTimer);
 				}
 			}
 		}
@@ -183,6 +185,13 @@ void Game::loadContent()
 	m_miniMenu.setFillColor(sf::Color{ 50, 160, 85, 155 });
 	m_miniMenu.setOutlineColor(sf::Color::Black);
 	m_miniMenu.setOutlineThickness(2.0f);
+
+	for (int i = 0; i < MAX_PARTICLES; i++) // Move all the particles up constantly
+	{
+		playerParticles[i].setSize({ 8.0f, 8.0f });
+		playerParticles[i].setOrigin(4.0f, 4.0f);
+		playerParticles[i].setFillColor(sf::Color{ 255,255,255,80 });
+	}
 }
 
 // Updates the game world
@@ -193,16 +202,30 @@ void Game::update(float t_delta)
 		m_window.close();
 	}
 
+	if (m_screenShakeTimer > 0) // Decriment the screenshake timer if it's greater than 0
+	{
+		m_screenShakeTimer--;
+		viewShake();
+
+		if (m_screenShakeTimer <= 0) // If the view shake timer has just stopped, reset the view
+		{
+			m_window.setView(sf::View{ sf::FloatRect(0.0f, 0.0f, static_cast<float>(m_window.getSize().x), static_cast<float>(m_window.getSize().y)) });
+		}
+	}
+		
+
 	// Update the score and text
 	switch (m_gameState)
 	{
 	case Game::MainMenu:
+		// Add main menu functionality here
 		break;
 	case Game::GamePlaying: // Game playing state
 		manageCollisions();
 
 		manageMovement(); // Manage the input and move the player accordingly
 		player.update(); // Update the player when active
+		updateParticles();
 		
 		updateNonPlayer();
 
@@ -222,6 +245,7 @@ void Game::update(float t_delta)
 		respawnEnemies();
 		break;
 	case Game::Pause:
+		// Add pause menu functionality here
 		break;
 	case Game::Restart: // Restart menu
 
@@ -237,6 +261,10 @@ void Game::render()
 	m_window.clear(sf::Color{ 90, 60, 30 }); // Clear the screen to a brown/cave colour
 
 	// Draw the game characters
+	for (int i = 0; i < MAX_PARTICLES; i++) // Draw all particals
+	{
+		m_window.draw(playerParticles[i]);
+	}
 	player.draw(m_window);
 
 	// Draw the crows
@@ -363,7 +391,7 @@ void Game::respawnEnemies()
 	int wormSpawnTime = 120; // Minimum worm spawn time
 
 	// Decrease spawn time as game goes on
-	int respawnMax = m_distance / 5.0f; // Get a fraction of the distance travelled
+	int respawnMax = static_cast<int>(m_distance / 5.0f); // Get a fraction of the distance travelled
 
 	int potentialSpawnTime = crowSpawnTime * maxSpawnTimeModifier - respawnMax;
 	if (crowSpawnTime < potentialSpawnTime)
@@ -456,5 +484,26 @@ void Game::manageCollisions()
 	if (vectorLength(distanceVector) < player.getCollisionRadius() + obstacle.getCollisionRadius())
 	{
 		player.damage(1, 15);
+	}
+}
+
+// Shakes the screen for a preset amount time
+void Game::viewShake()
+{
+	if (m_screenShakeTimer % 3 > 1) // Only shake the screen every three frames
+	{
+		m_window.setView(sf::View{ sf::FloatRect(static_cast<float>(rand() % 16 - 8), static_cast<float>(rand() % 16 - 8), static_cast<float>(m_window.getSize().x), static_cast<float>(m_window.getSize().y)) });
+	}
+}
+
+void Game::updateParticles()
+{
+	// (particleNum / 6 is to give delay between particles)
+	(particleNum / 6 < MAX_PARTICLES) ? particleNum++ : particleNum = 0; // Increase the particle number until it reaches max and then reset
+	playerParticles[particleNum / 6].setPosition(player.getPosition());
+
+	for (int i = 0; i < MAX_PARTICLES; i++) // Move all the particles up constantly
+	{
+		playerParticles[i].move(0.0f, -8.0f);
 	}
 }

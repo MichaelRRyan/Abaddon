@@ -3,6 +3,7 @@
 #define GAME
 
 #include <SFML\Graphics.hpp>
+#include <SFML\Audio.hpp>
 #include <ctime>
 #include <cstdlib>
 #include "Globals.h"
@@ -16,6 +17,7 @@
 
 const int MAX_CROWS{ 5 };
 const int MAX_EARTHWORMS{ 3 };
+const int MAX_PARTICLES{ 20 };
 
 class Game
 {
@@ -34,6 +36,8 @@ private:
 	void setupGame(); // Setup the game
 	void updateNonPlayer(); // Update the non player objects
 	void manageCollisions(); // Manage the game collisions between all entities
+	void viewShake();
+	void updateParticles();
 	
 	sf::RenderWindow m_window;
 	bool m_exitGame;
@@ -60,6 +64,9 @@ private:
 	Gun playerGun;
 	Obstacle obstacle;
 
+	sf::RectangleShape playerParticles[MAX_PARTICLES];
+	int particleNum{ 0 };
+
 	Menu mainMenu;
 
 	// Declare UI components
@@ -67,6 +74,8 @@ private:
 	sf::Text m_scoreText;
 	sf::Text m_gameOverText;
 	sf::Text m_restartText;
+
+	int m_screenShakeTimer{ 0 };
 };
 
 

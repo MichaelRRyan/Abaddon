@@ -8,8 +8,7 @@
 class Earthworm
 {
 	static const int TAIL_LENGTH{ 10 };
-	sf::CircleShape head;
-	sf::CircleShape tail[TAIL_LENGTH];
+	sf::CircleShape body[TAIL_LENGTH];
 	sf::Vector2f velocity;
 	int health;
 	float speed;
@@ -31,9 +30,10 @@ public:
 	void moveTail();
 	void checkGameBounds();
 	void playerCollisions(Player & t_player);
-	bool isColliding(sf::Sprite t_collider);
+	bool isColliding(sf::Vector2f t_pos, float t_radius);
 	void draw(sf::RenderWindow & t_window);
 
+	
 	inline bool getActive() { return active; } // Return the active state of the object
 	inline void setActive(bool t_active) { active = t_active; } // Set the active state of the object
 	inline void changeHealth(int t_changeAmount) { health += t_changeAmount; } // Change the health of the crow by the inputted value

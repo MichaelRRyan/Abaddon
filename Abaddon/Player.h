@@ -2,6 +2,7 @@
 #pragma once
 
 #include <SFML\Graphics.hpp>
+#include <SFML\Audio.hpp>
 #include "MyVector2.h"
 #include "Globals.h"
 
@@ -22,6 +23,9 @@ class Player
 	float wallLaunchSpeed; // How fast you'll be launched away from the wall if you touch it
 
 	bool active;
+
+	sf::SoundBuffer hurtSoundBuffer;
+	sf::Sound hurtSound;
 
 
 public:

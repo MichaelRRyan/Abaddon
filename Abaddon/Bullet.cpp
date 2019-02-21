@@ -48,6 +48,7 @@ void Bullet::intialise(sf::Vector2f t_position ,sf::Vector2f t_direction, float 
 	velocity = t_direction * t_speed;
 	damage = t_damage;
 	active = true;
+	collisionRadius = 5;
 }
 
 bool Bullet::isColliding(sf::Sprite t_collider)

@@ -7,6 +7,8 @@ Crow::Crow()
 {
 	loadFiles();
 	setup();
+
+	collisionRadius = 30;
 }
 
 // Setup the changing values of the crow
@@ -118,7 +120,7 @@ void Crow::dive(Player & t_player)
 		}
 		else // If the crow is diving check for player collisions
 		{
-			if (body.getGlobalBounds().intersects(t_player.getBody().getGlobalBounds())) // If the crow collides with the player, go back to patrolling
+			if (Global::isColliding(body.getPosition(),collisionRadius,t_player.getPosition(),t_player.getCollisionRadius())) // If the crow collides with the player, go back to patrolling
 			{
 				behaviour = Standby; // Set the behaviour to the standby
 				t_player.damage(attackDamage, 15); // Damage the player and stun them for 15 frames
@@ -127,7 +129,7 @@ void Crow::dive(Player & t_player)
 			{
 				behaviour = Standby; // Set the behaviour to the standby
 			}
-			if (body.getPosition().y > WINDOW_HEIGHT - body.getGlobalBounds().height / 2) // If the player dives out of the screen go to standby
+			if (body.getPosition().y > WINDOW_HEIGHT - collisionRadius) // If the player dives out of the screen go to standby
 			{
 				behaviour = Standby; // Set the behaviour to the standby
 			}
@@ -142,19 +144,19 @@ void Crow::dive(Player & t_player)
 void Crow::wallCollisions()
 {
 	// WALL COLLISIONS
-	if (body.getPosition().x < WALL_WIDTH + body.getGlobalBounds().width / 2) // Look out for left wall
+	if (body.getPosition().x < WALL_WIDTH + collisionRadius) // Look out for left wall
 	{
 		velocity.x = -velocity.x;
-		body.setPosition(WALL_WIDTH + body.getGlobalBounds().width / 2, body.getPosition().y);
+		body.setPosition(WALL_WIDTH + collisionRadius, body.getPosition().y);
 	}
-	else if (body.getPosition().x > WINDOW_WIDTH - WALL_WIDTH - body.getGlobalBounds().width / 2) // Look out for right wall
+	else if (body.getPosition().x > WINDOW_WIDTH - WALL_WIDTH - collisionRadius) // Look out for right wall
 	{
 		velocity.x = -velocity.x;
-		body.setPosition(WINDOW_WIDTH - WALL_WIDTH - body.getGlobalBounds().width / 2, body.getPosition().y);
+		body.setPosition(WINDOW_WIDTH - WALL_WIDTH - collisionRadius, body.getPosition().y);
 	}
-	if (body.getPosition().y < WINDOW_HEIGHT_BEGINNING + body.getGlobalBounds().height / 2) // Check for top boundary
+	if (body.getPosition().y < WINDOW_HEIGHT_BEGINNING + collisionRadius) // Check for top boundary
 	{
-		body.setPosition(body.getPosition().x, WINDOW_HEIGHT_BEGINNING + body.getGlobalBounds().height / 2);
+		body.setPosition(body.getPosition().x, WINDOW_HEIGHT_BEGINNING + collisionRadius);
 		velocity.y = 0.0f;
 	}
 }

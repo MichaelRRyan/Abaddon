@@ -37,6 +37,13 @@ void Player::loadFiles()
 
 	body.setTexture(spriteSheet);
 	body.setOrigin(body.getGlobalBounds().width / 2, body.getGlobalBounds().height / 2);
+
+	// Load audio files
+	if (!hurtSoundBuffer.loadFromFile("ASSETS\\AUDIO\\pain.wav"))
+	{
+		// Error loading file
+	}
+	hurtSound.setBuffer(hurtSoundBuffer);
 }
 
 // Update the player
@@ -124,6 +131,7 @@ void Player::damage(int t_damageValue, int t_freezeTime)
 	{
 		movementLockTimer = t_freezeTime;
 		health -= t_damageValue;
+		hurtSound.play();
 	}
 }
 
